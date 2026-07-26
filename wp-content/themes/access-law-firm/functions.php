@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ALF_THEME_VERSION', '1.1.9' );
+define( 'ALF_THEME_VERSION', '1.2.1' );
 
 require_once get_template_directory() . '/inc/settings.php';
 require_once get_template_directory() . '/inc/twilio-otp.php';
@@ -52,15 +52,16 @@ function alf_enqueue_assets() {
 	);
 
 	$deps = array();
+	$deps = array();
 	if ( function_exists( 'alf_captcha_enabled' ) && alf_captcha_enabled() ) {
 		wp_enqueue_script(
-			'cloudflare-turnstile',
-			'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit',
+			'google-recaptcha',
+			'https://www.google.com/recaptcha/api.js?render=explicit',
 			array(),
 			null,
 			true
 		);
-		$deps[] = 'cloudflare-turnstile';
+		$deps[] = 'google-recaptcha';
 	}
 
 	wp_enqueue_script(
@@ -75,14 +76,14 @@ function alf_enqueue_assets() {
 		'access-law-firm-main',
 		'alfLobby',
 		array(
-			'ajaxUrl'           => admin_url( 'admin-ajax.php' ),
-			'nonce'             => wp_create_nonce( 'alf_lobby' ),
-			'lobbyOpen'         => alf_is_lobby_open(),
-			'smsConfigured'     => alf_twilio_is_configured(),
-			'smsEnabled'        => function_exists( 'alf_sms_enabled' ) && alf_sms_enabled(),
-			'captchaEnabled'    => function_exists( 'alf_captcha_enabled' ) && alf_captcha_enabled(),
-			'turnstileSiteKey'  => function_exists( 'alf_turnstile_site_key' ) ? alf_turnstile_site_key() : '',
-			'verifyMode'        => function_exists( 'alf_lobby_verify_mode' ) ? alf_lobby_verify_mode() : 'none',
+			'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
+			'nonce'            => wp_create_nonce( 'alf_lobby' ),
+			'lobbyOpen'        => alf_is_lobby_open(),
+			'smsConfigured'    => alf_twilio_is_configured(),
+			'smsEnabled'       => function_exists( 'alf_sms_enabled' ) && alf_sms_enabled(),
+			'captchaEnabled'   => function_exists( 'alf_captcha_enabled' ) && alf_captcha_enabled(),
+			'recaptchaSiteKey' => function_exists( 'alf_recaptcha_site_key' ) ? alf_recaptcha_site_key() : '',
+			'verifyMode'       => function_exists( 'alf_lobby_verify_mode' ) ? alf_lobby_verify_mode() : 'none',
 		)
 	);
 }

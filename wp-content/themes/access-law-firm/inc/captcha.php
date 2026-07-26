@@ -1,6 +1,6 @@
 <?php
 /**
- * Cloudflare Turnstile helpers for the Virtual Lobby.
+ * Google reCAPTCHA v2 helpers for the Virtual Lobby.
  *
  * @package Access_Law_Firm
  */
@@ -37,29 +37,21 @@ function alf_captcha_setting_enabled() {
 }
 
 /**
- * Turnstile site key (falls back to legacy reCAPTCHA option key if present).
+ * reCAPTCHA site key.
  *
  * @return string
  */
-function alf_turnstile_site_key() {
-	$key = (string) alf_get_setting( 'turnstile_site_key', '' );
-	if ( '' === $key ) {
-		$key = (string) alf_get_setting( 'recaptcha_site_key', '' );
-	}
-	return $key;
+function alf_recaptcha_site_key() {
+	return (string) alf_get_setting( 'recaptcha_site_key', '' );
 }
 
 /**
- * Turnstile secret key (falls back to legacy reCAPTCHA option key if present).
+ * reCAPTCHA secret key.
  *
  * @return string
  */
-function alf_turnstile_secret_key() {
-	$key = (string) alf_get_setting( 'turnstile_secret_key', '' );
-	if ( '' === $key ) {
-		$key = (string) alf_get_setting( 'recaptcha_secret_key', '' );
-	}
-	return $key;
+function alf_recaptcha_secret_key() {
+	return (string) alf_get_setting( 'recaptcha_secret_key', '' );
 }
 
 /**
@@ -68,7 +60,7 @@ function alf_turnstile_secret_key() {
  * @return bool
  */
 function alf_captcha_is_configured() {
-	return (bool) alf_turnstile_site_key() && (bool) alf_turnstile_secret_key();
+	return (bool) alf_recaptcha_site_key() && (bool) alf_recaptcha_secret_key();
 }
 
 /**
@@ -110,24 +102,24 @@ function alf_mark_visitor_verified( $phone ) {
 }
 
 /**
- * Verify a Cloudflare Turnstile response token.
+ * Verify a Google reCAPTCHA v2 response token.
  *
  * @param string $token Client response token.
  * @return true|WP_Error
  */
-function alf_verify_turnstile_token( $token ) {
+function alf_verify_recaptcha_token( $token ) {
 	$token = trim( (string) $token );
 	if ( '' === $token ) {
 		return new WP_Error( 'alf_captcha_empty', __( 'Please complete the CAPTCHA.', 'access-law-firm' ) );
 	}
 
-	$secret = alf_turnstile_secret_key();
+	$secret = alf_recaptcha_secret_key();
 	if ( ! $secret ) {
 		return new WP_Error( 'alf_captcha_config', __( 'CAPTCHA is not configured.', 'access-law-firm' ) );
 	}
 
 	$response = wp_remote_post(
-		'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+		'https://www.google.com/recaptcha/api/siteverify',
 		array(
 			'timeout' => 15,
 			'body'    => array(
@@ -168,7 +160,7 @@ function alf_ajax_verify_captcha() {
 	$country = isset( $_POST['country'] ) ? wp_unslash( $_POST['country'] ) : '';
 	$phone   = alf_normalize_phone( isset( $_POST['phone'] ) ? wp_unslash( $_POST['phone'] ) : '', $country );
 
-	$verified = alf_verify_turnstile_token( $token );
+	$verified = alf_verify_recaptcha_token( $token );
 	if ( is_wp_error( $verified ) ) {
 		wp_send_json_error( array( 'message' => $verified->get_error_message() ), 400 );
 	}

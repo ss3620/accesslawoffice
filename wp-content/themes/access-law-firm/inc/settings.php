@@ -199,7 +199,7 @@ function alf_register_settings_page() {
 add_action( 'admin_menu', 'alf_register_settings_page' );
 
 /**
- * Remind admins to add Turnstile keys while SMS is off.
+ * Remind admins to add reCAPTCHA keys while SMS is off.
  */
 function alf_captcha_keys_admin_notice() {
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -217,7 +217,7 @@ function alf_captcha_keys_admin_notice() {
 
 	$url = admin_url( 'options-general.php?page=access-law-firm' );
 	echo '<div class="notice notice-warning"><p>';
-	echo esc_html__( 'Virtual Lobby is using CAPTCHA (SMS is off until Twilio is ready). Add your Cloudflare Turnstile keys under', 'access-law-firm' );
+	echo esc_html__( 'Virtual Lobby is using CAPTCHA (SMS is off until Twilio is ready). Add your Google reCAPTCHA v2 keys under', 'access-law-firm' );
 	echo ' <a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings → Access Law Firm', 'access-law-firm' ) . '</a>';
 	echo ' ' . esc_html__( 'or spam protection will not run.', 'access-law-firm' );
 	echo '</p></div>';
@@ -266,27 +266,27 @@ function alf_register_settings() {
 		'alf_verify_section',
 		array(
 			'key'         => 'captcha_enabled',
-			'label'       => __( 'Require Cloudflare Turnstile before check-in', 'access-law-firm' ),
+			'label'       => __( 'Require Google reCAPTCHA before check-in', 'access-law-firm' ),
 			'default'     => 1,
 		)
 	);
 
 	add_settings_field(
-		'turnstile_site_key',
-		__( 'Turnstile Site Key', 'access-law-firm' ),
+		'recaptcha_site_key',
+		__( 'reCAPTCHA Site Key', 'access-law-firm' ),
 		'alf_field_text',
 		'access-law-firm',
 		'alf_verify_section',
-		array( 'key' => 'turnstile_site_key', 'placeholder' => '0x4AAAA...' )
+		array( 'key' => 'recaptcha_site_key', 'placeholder' => '6Lc...' )
 	);
 
 	add_settings_field(
-		'turnstile_secret_key',
-		__( 'Turnstile Secret Key', 'access-law-firm' ),
+		'recaptcha_secret_key',
+		__( 'reCAPTCHA Secret Key', 'access-law-firm' ),
 		'alf_field_password',
 		'access-law-firm',
 		'alf_verify_section',
-		array( 'key' => 'turnstile_secret_key' )
+		array( 'key' => 'recaptcha_secret_key' )
 	);
 
 	add_settings_section(
@@ -342,7 +342,7 @@ function alf_verify_section_intro() {
 		esc_html_e( 'Phone collected only — enable CAPTCHA keys or SMS', 'access-law-firm' );
 	}
 	echo '</p>';
-	echo '<p class="description">' . esc_html__( 'Create free keys in the Cloudflare dashboard → Turnstile. Add your site domain, then paste Site Key and Secret Key here.', 'access-law-firm' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Create keys at Google reCAPTCHA — choose v2 “I’m not a robot” Checkbox. Add domains: accesslawoffice.com and www.accesslawoffice.com (and localhost for local testing).', 'access-law-firm' ) . '</p>';
 }
 
 /**
@@ -369,13 +369,13 @@ function alf_sanitize_settings( $input ) {
 	$output['sms_enabled']     = ! empty( $input['sms_enabled'] ) ? 1 : 0;
 	$output['captcha_enabled'] = ! empty( $input['captcha_enabled'] ) ? 1 : 0;
 
-	if ( isset( $input['turnstile_site_key'] ) ) {
-		$output['turnstile_site_key'] = sanitize_text_field( $input['turnstile_site_key'] );
+	if ( isset( $input['recaptcha_site_key'] ) ) {
+		$output['recaptcha_site_key'] = sanitize_text_field( $input['recaptcha_site_key'] );
 	}
-	if ( isset( $input['turnstile_secret_key'] ) ) {
-		$secret = trim( $input['turnstile_secret_key'] );
+	if ( isset( $input['recaptcha_secret_key'] ) ) {
+		$secret = trim( $input['recaptcha_secret_key'] );
 		if ( '' !== $secret ) {
-			$output['turnstile_secret_key'] = sanitize_text_field( $secret );
+			$output['recaptcha_secret_key'] = sanitize_text_field( $secret );
 		}
 	}
 

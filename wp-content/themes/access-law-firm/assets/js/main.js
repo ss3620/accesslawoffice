@@ -193,7 +193,7 @@
     var captchaEnabled = !!config.captchaEnabled;
     var verifyMode = config.verifyMode || (smsEnabled ? (captchaEnabled ? 'sms_captcha' : 'sms') : (captchaEnabled ? 'captcha' : 'none'));
     var verifyPhase = 'otp';
-    var turnstileWidgetId = null;
+    var recaptchaWidgetId = null;
     var captchaDone = false;
     var state = {
       name: '',
@@ -227,22 +227,22 @@
     }
     applyPhoneStepCopy();
 
-    function ensureTurnstile(attempt) {
-      var el = document.getElementById('lobbyTurnstile');
-      if (!el || !captchaEnabled || !config.turnstileSiteKey) return;
+    function ensureRecaptcha(attempt) {
+      var el = document.getElementById('lobbyRecaptcha');
+      if (!el || !captchaEnabled || !config.recaptchaSiteKey) return;
       attempt = attempt || 0;
-      if (typeof turnstile === 'undefined' || typeof turnstile.render !== 'function') {
+      if (typeof grecaptcha === 'undefined' || typeof grecaptcha.render !== 'function') {
         if (attempt < 40) {
-          setTimeout(function () { ensureTurnstile(attempt + 1); }, 100);
+          setTimeout(function () { ensureRecaptcha(attempt + 1); }, 100);
         }
         return;
       }
-      if (turnstileWidgetId !== null) {
-        try { turnstile.reset(turnstileWidgetId); } catch (e) { /* ignore */ }
+      if (recaptchaWidgetId !== null) {
+        try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
         return;
       }
       try {
-        turnstileWidgetId = turnstile.render(el, { sitekey: config.turnstileSiteKey });
+        recaptchaWidgetId = grecaptcha.render(el, { sitekey: config.recaptchaSiteKey });
       } catch (e) {
         /* Already rendered */
       }
@@ -257,7 +257,7 @@
       if (smsPanel) smsPanel.hidden = phase !== 'otp';
       if (nextBtn) nextBtn.textContent = phase === 'captcha' ? 'Continue →' : 'Verify';
       if (phase === 'captcha') {
-        setTimeout(ensureTurnstile, 50);
+        setTimeout(ensureRecaptcha, 50);
       }
       if (phase === 'otp') {
         var display = document.getElementById('lobbyPhoneDisplay');
@@ -371,8 +371,8 @@
       modal.querySelectorAll('[data-otp]').forEach(function (input) {
         input.value = '';
       });
-      if (turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
-        try { turnstile.reset(turnstileWidgetId); } catch (e) { /* ignore */ }
+      if (recaptchaWidgetId !== null && typeof grecaptcha !== 'undefined') {
+        try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
       }
       modal.querySelectorAll('.matter-option').forEach(function (btn) {
         btn.classList.remove('selected');
@@ -553,10 +553,10 @@
     function verifyCaptcha(triggerBtn) {
       if (busy) return;
       var token = '';
-      if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
-        token = turnstile.getResponse(turnstileWidgetId) || '';
-      } else if (typeof turnstile !== 'undefined' && typeof turnstile.getResponse === 'function') {
-        token = turnstile.getResponse() || '';
+      if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
+        token = grecaptcha.getResponse(recaptchaWidgetId) || '';
+      } else if (typeof grecaptcha !== 'undefined') {
+        token = grecaptcha.getResponse() || '';
       }
       if (!token) {
         showError('captcha', true, 'Please complete the CAPTCHA.');
@@ -581,8 +581,8 @@
         } else {
           var msg = res && res.data && res.data.message ? res.data.message : 'CAPTCHA failed. Please try again.';
           showError('captcha', true, msg);
-          if (turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
-            try { turnstile.reset(turnstileWidgetId); } catch (e) { /* ignore */ }
+          if (recaptchaWidgetId !== null && typeof grecaptcha !== 'undefined') {
+            try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
           }
         }
       });
