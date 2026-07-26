@@ -23,7 +23,7 @@ get_header();
 				</div>
 				<?php $alf_lobby_open = alf_is_lobby_open(); ?>
 				<div class="portrait">
-					<img src="<?php echo alf_img( 'stock-attorney.jpg' ); ?>" alt="Attorney portrait">
+					<img src="<?php echo alf_img( 'stock-attorney.png' ); ?>" alt="Attorney portrait">
 					<div id="alfHeroAvailability" class="availability<?php echo $alf_lobby_open ? '' : ' availability-closed'; ?>" data-lobby-availability>
 						<div data-lobby-avail-open <?php echo $alf_lobby_open ? '' : 'hidden'; ?>>
 							<strong>Virtual Lobby Open</strong>
@@ -305,7 +305,7 @@ get_header();
 	<section id="about">
 		<div class="container about-grid founder-section">
 			<div class="about-photo founder-photo">
-				<img src="<?php echo alf_img( 'stock-office.jpg' ); ?>" alt="Access Law Firm office">
+				<img src="<?php echo alf_img( 'stock-office.png' ); ?>" alt="Access Law Firm office">
 				<div class="founder-photo-label">
 					<strong>15+ Years</strong>
 					<span>Immigration Experience</span>
