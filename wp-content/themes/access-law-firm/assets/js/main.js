@@ -193,7 +193,7 @@
     var captchaEnabled = !!config.captchaEnabled;
     var verifyMode = config.verifyMode || (smsEnabled ? (captchaEnabled ? 'sms_captcha' : 'sms') : (captchaEnabled ? 'captcha' : 'none'));
     var verifyPhase = 'otp';
-    var recaptchaWidgetId = null;
+    var turnstileWidgetId = null;
     var captchaDone = false;
     var state = {
       name: '',
@@ -227,16 +227,22 @@
     }
     applyPhoneStepCopy();
 
-    function ensureRecaptcha() {
-      var el = document.getElementById('lobbyRecaptcha');
-      if (!el || !captchaEnabled || !config.recaptchaSiteKey) return;
-      if (typeof grecaptcha === 'undefined' || typeof grecaptcha.render !== 'function') return;
-      if (recaptchaWidgetId !== null) {
-        try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
+    function ensureTurnstile(attempt) {
+      var el = document.getElementById('lobbyTurnstile');
+      if (!el || !captchaEnabled || !config.turnstileSiteKey) return;
+      attempt = attempt || 0;
+      if (typeof turnstile === 'undefined' || typeof turnstile.render !== 'function') {
+        if (attempt < 40) {
+          setTimeout(function () { ensureTurnstile(attempt + 1); }, 100);
+        }
+        return;
+      }
+      if (turnstileWidgetId !== null) {
+        try { turnstile.reset(turnstileWidgetId); } catch (e) { /* ignore */ }
         return;
       }
       try {
-        recaptchaWidgetId = grecaptcha.render(el, { sitekey: config.recaptchaSiteKey });
+        turnstileWidgetId = turnstile.render(el, { sitekey: config.turnstileSiteKey });
       } catch (e) {
         /* Already rendered */
       }
@@ -251,7 +257,7 @@
       if (smsPanel) smsPanel.hidden = phase !== 'otp';
       if (nextBtn) nextBtn.textContent = phase === 'captcha' ? 'Continue →' : 'Verify';
       if (phase === 'captcha') {
-        setTimeout(ensureRecaptcha, 50);
+        setTimeout(ensureTurnstile, 50);
       }
       if (phase === 'otp') {
         var display = document.getElementById('lobbyPhoneDisplay');
@@ -365,8 +371,8 @@
       modal.querySelectorAll('[data-otp]').forEach(function (input) {
         input.value = '';
       });
-      if (recaptchaWidgetId !== null && typeof grecaptcha !== 'undefined') {
-        try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
+      if (turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+        try { turnstile.reset(turnstileWidgetId); } catch (e) { /* ignore */ }
       }
       modal.querySelectorAll('.matter-option').forEach(function (btn) {
         btn.classList.remove('selected');
@@ -547,10 +553,10 @@
     function verifyCaptcha(triggerBtn) {
       if (busy) return;
       var token = '';
-      if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
-        token = grecaptcha.getResponse(recaptchaWidgetId) || '';
-      } else if (typeof grecaptcha !== 'undefined') {
-        token = grecaptcha.getResponse() || '';
+      if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+        token = turnstile.getResponse(turnstileWidgetId) || '';
+      } else if (typeof turnstile !== 'undefined' && typeof turnstile.getResponse === 'function') {
+        token = turnstile.getResponse() || '';
       }
       if (!token) {
         showError('captcha', true, 'Please complete the CAPTCHA.');
@@ -575,8 +581,8 @@
         } else {
           var msg = res && res.data && res.data.message ? res.data.message : 'CAPTCHA failed. Please try again.';
           showError('captcha', true, msg);
-          if (recaptchaWidgetId !== null && typeof grecaptcha !== 'undefined') {
-            try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
+          if (turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+            try { turnstile.reset(turnstileWidgetId); } catch (e) { /* ignore */ }
           }
         }
       });

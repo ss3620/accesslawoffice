@@ -196,7 +196,7 @@
 				<h3 class="lobby-step-title">Quick security check</h3>
 				<p class="lobby-step-desc">Please confirm you are human to continue to the Virtual Lobby.</p>
 				<div class="lobby-captcha-wrap">
-					<div id="lobbyRecaptcha" class="g-recaptcha"></div>
+					<div id="lobbyTurnstile"></div>
 				</div>
 				<div class="lobby-error" data-error-for="captcha">Please complete the CAPTCHA.</div>
 			</div>
