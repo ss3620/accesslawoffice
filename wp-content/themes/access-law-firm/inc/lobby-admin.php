@@ -460,7 +460,7 @@ function alf_render_lobby_queue_page() {
 }
 
 /**
- * Enqueue lobby queue scripts (toggle uses form POST — no JS required).
+ * Enqueue lobby queue scripts (footer + DOM-ready so the table exists).
  *
  * @param string $hook Current admin page hook.
  */
@@ -479,99 +479,109 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
 
 	$js = <<<'JS'
 (function () {
-  var cfg = window.alfLobbyAdmin || {};
-  var bodyEl = document.getElementById('alf-queue-body');
-  if (!bodyEl) return;
+  function initLobbyQueue() {
+    var cfg = window.alfLobbyAdmin || {};
+    var bodyEl = document.getElementById('alf-queue-body');
+    if (!bodyEl) return;
 
-  function post(action, data) {
-    var body = new URLSearchParams();
-    body.append('action', action);
-    body.append('nonce', cfg.nonce || '');
-    Object.keys(data || {}).forEach(function (k) { body.append(k, data[k]); });
-    return fetch(cfg.ajaxUrl, {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-      body: body.toString()
-    }).then(function (r) {
-      return r.text().then(function (text) {
-        try { return JSON.parse(text); }
-        catch (e) { return { success: false, data: { message: 'Unexpected response.' } }; }
+    function post(action, data) {
+      var body = new URLSearchParams();
+      body.append('action', action);
+      body.append('nonce', cfg.nonce || '');
+      Object.keys(data || {}).forEach(function (k) { body.append(k, data[k]); });
+      return fetch(cfg.ajaxUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+        body: body.toString()
+      }).then(function (r) {
+        return r.text().then(function (text) {
+          try { return JSON.parse(text); }
+          catch (e) { return { success: false, data: { message: 'Unexpected response.' } }; }
+        });
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, function (c) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+      });
+    }
+
+    function renderQueue(items) {
+      if (!items || !items.length) {
+        bodyEl.innerHTML = '<tr><td colspan="7">No visitors in the queue right now.</td></tr>';
+        return;
+      }
+      bodyEl.innerHTML = items.map(function (row) {
+        var actions = '';
+        if (row.status === 'waiting') {
+          actions += '<button type="button" class="button button-primary" data-action="ready" data-id="' + row.id + '">Ready</button>';
+        }
+        if (row.status === 'ready' || row.status === 'in_meeting') {
+          actions += '<button type="button" class="button" data-action="complete" data-id="' + row.id + '">Complete</button>';
+        }
+        if (row.status === 'waiting' || row.status === 'ready') {
+          actions += '<button type="button" class="button" data-action="dismiss" data-id="' + row.id + '">Dismiss</button>';
+        }
+        return '<tr>' +
+          '<td>' + escapeHtml(row.position) + '</td>' +
+          '<td><strong>' + escapeHtml(row.name) + '</strong></td>' +
+          '<td>' + escapeHtml(row.phone) + '</td>' +
+          '<td>' + escapeHtml(row.matter) + '</td>' +
+          '<td>' + escapeHtml(row.wait) + '</td>' +
+          '<td><span class="alf-status-badge alf-status-' + escapeHtml(row.status) + '">' + escapeHtml(row.status_label) + '</span></td>' +
+          '<td class="alf-queue-actions">' + actions + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function loadQueue() {
+      post('alf_queue_list', {}).then(function (res) {
+        if (res && res.success) renderQueue(res.data.items || []);
+        else {
+          var msg = (res && res.data && res.data.message) ? res.data.message : 'Could not load queue.';
+          bodyEl.innerHTML = '<tr><td colspan="7">' + escapeHtml(msg) + '</td></tr>';
+        }
+      }).catch(function () {
+        bodyEl.innerHTML = '<tr><td colspan="7">Network error loading queue.</td></tr>';
+      });
+    }
+
+    bodyEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-action][data-id]');
+      if (!btn) return;
+      btn.disabled = true;
+      post('alf_queue_update', {
+        visit_id: btn.getAttribute('data-id'),
+        queue_action: btn.getAttribute('data-action')
+      }).then(function (res) {
+        btn.disabled = false;
+        if (res && res.success) loadQueue();
+        else alert((res && res.data && res.data.message) || 'Update failed.');
+      }).catch(function () {
+        btn.disabled = false;
+        alert('Network error.');
       });
     });
+
+    loadQueue();
+    setInterval(loadQueue, 6000);
   }
 
-  function escapeHtml(s) {
-    return String(s || '').replace(/[&<>"']/g, function (c) {
-      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
-    });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLobbyQueue);
+  } else {
+    initLobbyQueue();
   }
-
-  function renderQueue(items) {
-    if (!items || !items.length) {
-      bodyEl.innerHTML = '<tr><td colspan="7">No visitors in the queue right now.</td></tr>';
-      return;
-    }
-    bodyEl.innerHTML = items.map(function (row) {
-      var actions = '';
-      if (row.status === 'waiting') {
-        actions += '<button type="button" class="button button-primary" data-action="ready" data-id="' + row.id + '">Ready</button>';
-      }
-      if (row.status === 'ready' || row.status === 'in_meeting') {
-        actions += '<button type="button" class="button" data-action="complete" data-id="' + row.id + '">Complete</button>';
-      }
-      if (row.status === 'waiting' || row.status === 'ready') {
-        actions += '<button type="button" class="button" data-action="dismiss" data-id="' + row.id + '">Dismiss</button>';
-      }
-      return '<tr>' +
-        '<td>' + escapeHtml(row.position) + '</td>' +
-        '<td><strong>' + escapeHtml(row.name) + '</strong></td>' +
-        '<td>' + escapeHtml(row.phone) + '</td>' +
-        '<td>' + escapeHtml(row.matter) + '</td>' +
-        '<td>' + escapeHtml(row.wait) + '</td>' +
-        '<td><span class="alf-status-badge alf-status-' + escapeHtml(row.status) + '">' + escapeHtml(row.status_label) + '</span></td>' +
-        '<td class="alf-queue-actions">' + actions + '</td>' +
-        '</tr>';
-    }).join('');
-  }
-
-  function loadQueue() {
-    post('alf_queue_list', {}).then(function (res) {
-      if (res && res.success) renderQueue(res.data.items || []);
-      else {
-        var msg = (res && res.data && res.data.message) ? res.data.message : 'Could not load queue.';
-        bodyEl.innerHTML = '<tr><td colspan="7">' + escapeHtml(msg) + '</td></tr>';
-      }
-    }).catch(function () {
-      bodyEl.innerHTML = '<tr><td colspan="7">Network error loading queue.</td></tr>';
-    });
-  }
-
-  bodyEl.addEventListener('click', function (e) {
-    var btn = e.target.closest('[data-action][data-id]');
-    if (!btn) return;
-    btn.disabled = true;
-    post('alf_queue_update', {
-      visit_id: btn.getAttribute('data-id'),
-      queue_action: btn.getAttribute('data-action')
-    }).then(function (res) {
-      btn.disabled = false;
-      if (res && res.success) loadQueue();
-      else alert((res && res.data && res.data.message) || 'Update failed.');
-    }).catch(function () {
-      btn.disabled = false;
-      alert('Network error.');
-    });
-  });
-
-  loadQueue();
-  setInterval(loadQueue, 6000);
 })();
 JS;
 
-	wp_enqueue_script( 'jquery' );
-	wp_add_inline_script( 'jquery', 'window.alfLobbyAdmin = ' . $cfg . ';', 'before' );
-	wp_add_inline_script( 'jquery', $js, 'after' );
+	// Footer handle so this runs after the queue markup exists.
+	wp_register_script( 'alf-lobby-admin', false, array(), defined( 'ALF_THEME_VERSION' ) ? ALF_THEME_VERSION : null, true );
+	wp_enqueue_script( 'alf-lobby-admin' );
+	wp_add_inline_script( 'alf-lobby-admin', 'window.alfLobbyAdmin = ' . $cfg . ';', 'before' );
+	wp_add_inline_script( 'alf-lobby-admin', $js, 'after' );
 }
 add_action( 'admin_enqueue_scripts', 'alf_enqueue_lobby_admin_assets' );
 
