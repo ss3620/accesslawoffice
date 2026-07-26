@@ -86,7 +86,69 @@ function alf_register_lobby_admin_menu() {
 add_action( 'admin_menu', 'alf_register_lobby_admin_menu' );
 
 /**
- * Render lobby settings (Teams URL) — Administrators only.
+ * Create or update the default Receptionist user.
+ *
+ * @return array{success:bool,message:string,username?:string,password?:string,email?:string}
+ */
+function alf_create_receptionist_user() {
+	if ( ! get_role( 'alf_receptionist' ) ) {
+		alf_register_receptionist_role();
+	}
+
+	$login = 'receptionist';
+	$email = 'receptionist@accesslawfirm.com';
+	$pass  = 'Reception@123';
+
+	if ( username_exists( $login ) || email_exists( $email ) ) {
+		$user = get_user_by( 'login', $login );
+		if ( ! $user ) {
+			$user = get_user_by( 'email', $email );
+		}
+		if ( ! $user ) {
+			return array(
+				'success' => false,
+				'message' => __( 'A conflicting user exists but could not be loaded.', 'access-law-firm' ),
+			);
+		}
+		$user->set_role( 'alf_receptionist' );
+		return array(
+			'success'  => true,
+			'message'  => __( 'Receptionist user already existed — role updated to Receptionist. Password was not changed.', 'access-law-firm' ),
+			'username' => $user->user_login,
+			'email'    => $user->user_email,
+		);
+	}
+
+	$id = wp_create_user( $login, $pass, $email );
+	if ( is_wp_error( $id ) ) {
+		return array(
+			'success' => false,
+			'message' => $id->get_error_message(),
+		);
+	}
+
+	$user = new WP_User( $id );
+	$user->set_role( 'alf_receptionist' );
+	wp_update_user(
+		array(
+			'ID'           => $id,
+			'display_name' => 'Receptionist',
+			'first_name'   => 'Lobby',
+			'last_name'    => 'Receptionist',
+		)
+	);
+
+	return array(
+		'success'  => true,
+		'message'  => __( 'Receptionist user created successfully.', 'access-law-firm' ),
+		'username' => $login,
+		'email'    => $email,
+		'password' => $pass,
+	);
+}
+
+/**
+ * Render lobby settings (Teams URL + create receptionist) — Administrators only.
  */
 function alf_render_lobby_settings_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -99,7 +161,25 @@ function alf_render_lobby_settings_page() {
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Lobby settings saved.', 'access-law-firm' ) . '</p></div>';
 	}
 
-	$teams_url = alf_get_setting( 'teams_meeting_url', '' );
+	if ( isset( $_POST['alf_create_receptionist_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['alf_create_receptionist_nonce'] ) ), 'alf_create_receptionist' ) ) {
+		$result = alf_create_receptionist_user();
+		$class  = ! empty( $result['success'] ) ? 'notice-success' : 'notice-error';
+		echo '<div class="notice ' . esc_attr( $class ) . ' is-dismissible"><p>' . esc_html( $result['message'] ) . '</p>';
+		if ( ! empty( $result['success'] ) ) {
+			echo '<p><strong>' . esc_html__( 'Username:', 'access-law-firm' ) . '</strong> ' . esc_html( $result['username'] ) . '<br>';
+			echo '<strong>' . esc_html__( 'Email:', 'access-law-firm' ) . '</strong> ' . esc_html( $result['email'] );
+			if ( ! empty( $result['password'] ) ) {
+				echo '<br><strong>' . esc_html__( 'Password:', 'access-law-firm' ) . '</strong> ' . esc_html( $result['password'] );
+				echo '<br><em>' . esc_html__( 'Save this password now, then ask the receptionist to change it after first login.', 'access-law-firm' ) . '</em>';
+			}
+			echo '</p>';
+		}
+		echo '</div>';
+	}
+
+	$teams_url        = alf_get_setting( 'teams_meeting_url', '' );
+	$existing_user    = get_user_by( 'login', 'receptionist' );
+	$has_receptionist = $existing_user && in_array( 'alf_receptionist', (array) $existing_user->roles, true );
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Virtual Lobby Settings', 'access-law-firm' ); ?></h1>
@@ -116,6 +196,33 @@ function alf_render_lobby_settings_page() {
 			</table>
 			<?php submit_button( __( 'Save Settings', 'access-law-firm' ) ); ?>
 		</form>
+
+		<hr>
+
+		<h2><?php esc_html_e( 'Receptionist account', 'access-law-firm' ); ?></h2>
+		<?php if ( $has_receptionist ) : ?>
+			<p><?php esc_html_e( 'A Receptionist user already exists:', 'access-law-firm' ); ?>
+				<strong><?php echo esc_html( $existing_user->user_login ); ?></strong>
+				(<?php echo esc_html( $existing_user->user_email ); ?>)
+			</p>
+			<p><a class="button" href="<?php echo esc_url( get_edit_user_link( $existing_user->ID ) ); ?>"><?php esc_html_e( 'Edit user', 'access-law-firm' ); ?></a></p>
+		<?php else : ?>
+			<p><?php esc_html_e( 'Create a WordPress user with the Receptionist role so staff can open the lobby and manage the queue (without access to Themes, Plugins, or Twilio settings).', 'access-law-firm' ); ?></p>
+		<?php endif; ?>
+		<form method="post" style="margin-top:12px">
+			<?php wp_nonce_field( 'alf_create_receptionist', 'alf_create_receptionist_nonce' ); ?>
+			<?php
+			submit_button(
+				$has_receptionist
+					? __( 'Re-apply Receptionist role', 'access-law-firm' )
+					: __( 'Create Receptionist user', 'access-law-firm' ),
+				'secondary',
+				'submit',
+				false
+			);
+			?>
+		</form>
+
 		<p class="description"><?php esc_html_e( 'Twilio SMS credentials remain under Settings → Access Law Firm.', 'access-law-firm' ); ?></p>
 	</div>
 	<?php
