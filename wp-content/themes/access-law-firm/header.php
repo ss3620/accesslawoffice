@@ -28,9 +28,9 @@
 			<button class="btn btn-primary open-lobby" type="button">Join Virtual Lobby</button>
 		</nav>
 		<?php $alf_lobby_open = alf_is_lobby_open(); ?>
-		<div class="status<?php echo $alf_lobby_open ? '' : ' status-closed'; ?>">
+		<div id="alfHeaderStatus" class="status<?php echo $alf_lobby_open ? '' : ' status-closed'; ?>" data-lobby-status>
 			<span class="dot" aria-hidden="true"></span>
-			<?php echo $alf_lobby_open ? esc_html__( 'Virtual Lobby Open', 'access-law-firm' ) : esc_html__( 'Virtual Lobby Closed', 'access-law-firm' ); ?>
+			<span data-lobby-status-label><?php echo $alf_lobby_open ? esc_html__( 'Virtual Lobby Open', 'access-law-firm' ) : esc_html__( 'Virtual Lobby Closed', 'access-law-firm' ); ?></span>
 		</div>
 	</div>
 </header>

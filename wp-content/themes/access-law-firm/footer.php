@@ -42,7 +42,8 @@
 			<div class="lobby-welcome">
 				<div class="lobby-brand-mark" aria-hidden="true">A</div>
 				<div class="eyebrow" style="color:#f0bd5d">Access Law Firm</div>
-				<?php if ( $alf_lobby_open ) : ?>
+
+				<div data-lobby-welcome-open <?php echo $alf_lobby_open ? '' : 'hidden'; ?>>
 					<h2 id="lobbyModalTitle">Welcome to our Virtual Reception</h2>
 					<p>Check in securely to speak with our live receptionist and connect with the attorney.</p>
 					<div class="lobby-status-box">
@@ -53,8 +54,10 @@
 						</div>
 					</div>
 					<button class="btn btn-gold" type="button" data-lobby-next style="width:100%">Enter Lobby</button>
-				<?php else : ?>
-					<h2 id="lobbyModalTitle">The Virtual Lobby Is Closed</h2>
+				</div>
+
+				<div data-lobby-welcome-closed <?php echo $alf_lobby_open ? 'hidden' : ''; ?>>
+					<h2>The Virtual Lobby Is Closed</h2>
 					<p>Our live reception is currently offline. Please check back during lobby hours.</p>
 					<div class="lobby-status-box">
 						<strong>Lobby Hours</strong>
@@ -66,7 +69,7 @@
 						</div>
 					</div>
 					<a class="btn btn-secondary" href="tel:+17134892089" style="width:100%">Call the Office</a>
-				<?php endif; ?>
+				</div>
 			</div>
 		</div>
 

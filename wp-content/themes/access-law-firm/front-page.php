@@ -24,16 +24,17 @@ get_header();
 				<?php $alf_lobby_open = alf_is_lobby_open(); ?>
 				<div class="portrait">
 					<img src="<?php echo alf_img( 'stock-attorney.jpg' ); ?>" alt="Attorney portrait">
-					<div class="availability<?php echo $alf_lobby_open ? '' : ' availability-closed'; ?>">
-						<?php if ( $alf_lobby_open ) : ?>
+					<div id="alfHeroAvailability" class="availability<?php echo $alf_lobby_open ? '' : ' availability-closed'; ?>" data-lobby-availability>
+						<div data-lobby-avail-open <?php echo $alf_lobby_open ? '' : 'hidden'; ?>>
 							<strong>Virtual Lobby Open</strong>
 							<span>Live assistant available</span><br>
 							<small>● Average wait: approximately 4 minutes</small>
-						<?php else : ?>
+						</div>
+						<div data-lobby-avail-closed <?php echo $alf_lobby_open ? 'hidden' : ''; ?>>
 							<strong>Virtual Lobby Closed</strong>
 							<span>We are currently offline</span><br>
 							<small>Please check back during lobby hours.</small>
-						<?php endif; ?>
+						</div>
 					</div>
 				</div>
 			</div>

@@ -46,7 +46,10 @@ function alf_update_setting( $key, $value ) {
 		$settings = array();
 	}
 	$settings[ $key ] = $value;
-	update_option( ALF_OPTION_KEY, $settings );
+	update_option( ALF_OPTION_KEY, $settings, true );
+	// Ensure front-end / object-cache see the new value immediately.
+	wp_cache_delete( ALF_OPTION_KEY, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
 }
 
 /**
@@ -58,6 +61,23 @@ function alf_is_lobby_open() {
 	// Cast via int so string "0" from the options table is correctly treated as closed.
 	return 1 === (int) alf_get_setting( 'lobby_open', 1 );
 }
+
+/**
+ * Public AJAX: current lobby open/closed status for the front-end.
+ */
+function alf_ajax_public_lobby_status() {
+	nocache_headers();
+	wp_send_json_success(
+		array(
+			'open'  => alf_is_lobby_open(),
+			'label' => alf_is_lobby_open()
+				? __( 'Virtual Lobby Open', 'access-law-firm' )
+				: __( 'Virtual Lobby Closed', 'access-law-firm' ),
+		)
+	);
+}
+add_action( 'wp_ajax_alf_lobby_status', 'alf_ajax_public_lobby_status' );
+add_action( 'wp_ajax_nopriv_alf_lobby_status', 'alf_ajax_public_lobby_status' );
 
 /**
  * Whether Twilio is fully configured.

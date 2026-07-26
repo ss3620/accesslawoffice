@@ -46,7 +46,8 @@ function alf_register_receptionist_role() {
 add_action( 'after_setup_theme', 'alf_register_receptionist_role' );
 
 /**
- * Whether the current user is a Receptionist (not a full Administrator).
+ * Whether the current user is a Receptionist (not an Administrator).
+ * Used only for UI restrictions (dashboard/menu). Capability checks stay separate.
  *
  * @return bool
  */
@@ -55,10 +56,14 @@ function alf_is_receptionist_user() {
 	if ( ! $user || empty( $user->ID ) ) {
 		return false;
 	}
-	if ( user_can( $user, 'manage_options' ) ) {
+
+	// Administrators always keep the full wp-admin UI.
+	if ( user_can( $user, 'manage_options' ) || in_array( 'administrator', (array) $user->roles, true ) ) {
 		return false;
 	}
-	return in_array( 'alf_receptionist', (array) $user->roles, true ) || user_can( $user, 'alf_manage_lobby' );
+
+	// Only the Receptionist role gets the stripped dashboard/menu.
+	return in_array( 'alf_receptionist', (array) $user->roles, true );
 }
 
 /**

@@ -6,6 +6,89 @@
   'use strict';
 
   /* ------------------------------------------------------------------ */
+  /* Live lobby open/closed status (keeps front-end in sync with admin)  */
+  /* Lightweight: no interval polling — only on load, tab focus, modal.  */
+  /* ------------------------------------------------------------------ */
+  (function initLobbyStatusSync() {
+    var config = window.alfLobby || {};
+    if (!config.ajaxUrl) return;
+
+    var lastFetchAt = 0;
+    var minGapMs = 30000; // at most once per 30s even if focus fires often
+    var inFlight = false;
+
+    function applyLobbyOpen(isOpen) {
+      config.lobbyOpen = !!isOpen;
+      window.alfLobby = config;
+
+      document.querySelectorAll('[data-lobby-status]').forEach(function (el) {
+        el.classList.toggle('status-closed', !isOpen);
+        var label = el.querySelector('[data-lobby-status-label]');
+        if (label) {
+          label.textContent = isOpen ? 'Virtual Lobby Open' : 'Virtual Lobby Closed';
+        }
+      });
+
+      document.querySelectorAll('[data-lobby-availability]').forEach(function (el) {
+        el.classList.toggle('availability-closed', !isOpen);
+        var openEl = el.querySelector('[data-lobby-avail-open]');
+        var closedEl = el.querySelector('[data-lobby-avail-closed]');
+        if (openEl) openEl.hidden = !isOpen;
+        if (closedEl) closedEl.hidden = !!isOpen;
+      });
+
+      document.querySelectorAll('[data-lobby-welcome-open]').forEach(function (el) {
+        el.hidden = !isOpen;
+      });
+      document.querySelectorAll('[data-lobby-welcome-closed]').forEach(function (el) {
+        el.hidden = !!isOpen;
+      });
+    }
+
+    function fetchStatus(force) {
+      var now = Date.now();
+      if (inFlight) return;
+      if (!force && now - lastFetchAt < minGapMs) return;
+
+      inFlight = true;
+      lastFetchAt = now;
+
+      var body = new URLSearchParams();
+      body.append('action', 'alf_lobby_status');
+
+      fetch(config.ajaxUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'Cache-Control': 'no-cache'
+        },
+        body: body.toString()
+      }).then(function (r) {
+        return r.json();
+      }).then(function (res) {
+        if (res && res.success && res.data) {
+          applyLobbyOpen(!!res.data.open);
+        }
+      }).catch(function () { /* ignore transient network errors */ })
+        .finally(function () { inFlight = false; });
+    }
+
+    // Expose for lobby modal open (one check when visitor clicks Join).
+    window.alfRefreshLobbyStatus = function () {
+      fetchStatus(true);
+    };
+
+    // Once on load (fixes cached HTML). No setInterval.
+    fetchStatus(true);
+
+    // Only when user returns to this tab — throttled to 30s.
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) fetchStatus(false);
+    });
+  })();
+
+  /* ------------------------------------------------------------------ */
   /* Flip credential cards                                                */
   /* ------------------------------------------------------------------ */
   document.querySelectorAll('.flip-card').forEach(function (card) {
@@ -174,6 +257,9 @@
     }
 
     function openModal() {
+      if (typeof window.alfRefreshLobbyStatus === 'function') {
+        window.alfRefreshLobbyStatus();
+      }
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('lobby-open');
