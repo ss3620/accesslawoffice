@@ -41,7 +41,8 @@ function alf_get_setting( $key, $default = '' ) {
  * @return bool
  */
 function alf_is_lobby_open() {
-	return (bool) alf_get_setting( 'lobby_open', 1 );
+	// Cast via int so string "0" from the options table is correctly treated as closed.
+	return 1 === (int) alf_get_setting( 'lobby_open', 1 );
 }
 
 /**

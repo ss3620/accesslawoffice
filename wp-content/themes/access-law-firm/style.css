@@ -195,21 +195,22 @@ header.site-header {
   box-shadow: 0 0 0 5px #eaf8ef;
 }
 
-.status-closed {
-  color: #8a94a6;
+.status.status-closed {
+  color: #b42318;
 }
 
-.status-closed .dot {
-  background: #c04545;
-  box-shadow: 0 0 0 5px #f8eaea;
+.status.status-closed .dot {
+  background: #d92d20;
+  box-shadow: 0 0 0 5px #fdeceb;
 }
 
 .availability-closed strong {
   color: #b42318;
 }
 
+.availability-closed span,
 .availability-closed small {
-  color: var(--muted);
+  color: #8a3b35;
 }
 
 .hero {
