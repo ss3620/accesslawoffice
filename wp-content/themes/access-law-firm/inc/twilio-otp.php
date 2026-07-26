@@ -172,6 +172,9 @@ function alf_ajax_verify_otp() {
 	delete_transient( $key );
 	delete_transient( alf_otp_throttle_key( $phone ) );
 
+	// Allow check-in for a short window after successful verify.
+	set_transient( 'alf_phone_ok_' . md5( $phone . '|' . wp_salt() ), 1, 15 * MINUTE_IN_SECONDS );
+
 	wp_send_json_success( array( 'message' => __( 'Phone number verified.', 'access-law-firm' ) ) );
 }
 add_action( 'wp_ajax_alf_verify_otp', 'alf_ajax_verify_otp' );

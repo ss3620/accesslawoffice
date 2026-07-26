@@ -230,7 +230,7 @@
 			</div>
 		</div>
 
-		<!-- Step 5: Checked in (4 of 4) -->
+		<!-- Step 5: Checked in (4 of 4) — waits until receptionist marks Ready -->
 		<div class="lobby-step" data-step="5">
 			<div class="lobby-progress" data-progress="4">
 				<div class="lobby-progress-label">Step 4 of 4</div>
@@ -247,17 +247,15 @@
 			<p class="lobby-step-desc">A receptionist will be with you shortly. Please keep this window open.</p>
 			<div class="lobby-confirm-stats">
 				<div>
-					<strong>Estimated Wait</strong>
-					<span>12 Minutes</span>
+					<strong>Status</strong>
+					<span id="lobbyWaitStatus">Waiting</span>
 				</div>
 				<div>
 					<strong>Current Position</strong>
-					<span>#3</span>
+					<span id="lobbyWaitPosition">—</span>
 				</div>
 			</div>
-			<div class="lobby-actions">
-				<button class="btn btn-primary" type="button" data-lobby-next>Continue</button>
-			</div>
+			<p class="note" id="lobbyWaitNote" style="text-align:center;margin-top:14px">Waiting for the receptionist…</p>
 		</div>
 
 		<!-- Step 6: Reception ready -->
@@ -276,7 +274,7 @@
 					Join Reception
 				</button>
 			</div>
-			<p class="lobby-powered">Powered by Microsoft Teams · Prototype only — no meeting is started.</p>
+			<p class="lobby-powered">Powered by Microsoft Teams</p>
 		</div>
 	</div>
 </div>

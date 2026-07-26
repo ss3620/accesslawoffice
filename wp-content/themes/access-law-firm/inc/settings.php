@@ -2,9 +2,8 @@
 /**
  * Admin settings for Access Law Firm theme.
  *
- * Adds a settings page under Settings > Access Law Firm with:
- *  - Virtual Lobby Open on/off toggle (controls header status).
- *  - Twilio credentials for SMS verification (SID, Auth Token, From number).
+ * - Virtual Lobby Open/Closed lives on the WordPress Dashboard (widget).
+ * - Twilio SMS credentials live under Settings > Access Law Firm.
  *
  * @package Access_Law_Firm
  */
@@ -36,6 +35,21 @@ function alf_get_setting( $key, $default = '' ) {
 }
 
 /**
+ * Update a single setting without wiping the rest.
+ *
+ * @param string $key   Setting key.
+ * @param mixed  $value Value to store.
+ */
+function alf_update_setting( $key, $value ) {
+	$settings = get_option( ALF_OPTION_KEY, array() );
+	if ( ! is_array( $settings ) ) {
+		$settings = array();
+	}
+	$settings[ $key ] = $value;
+	update_option( ALF_OPTION_KEY, $settings );
+}
+
+/**
  * Whether the Virtual Lobby is currently open.
  *
  * @return bool
@@ -54,6 +68,10 @@ function alf_twilio_is_configured() {
 	return alf_get_setting( 'twilio_sid' ) && alf_get_setting( 'twilio_token' ) && alf_get_setting( 'twilio_from' );
 }
 
+/* =========================================================
+ * Settings page — Twilio only
+ * ========================================================= */
+
 /**
  * Register the settings page.
  */
@@ -69,7 +87,7 @@ function alf_register_settings_page() {
 add_action( 'admin_menu', 'alf_register_settings_page' );
 
 /**
- * Register settings, sections and fields.
+ * Register Twilio settings fields.
  */
 function alf_register_settings() {
 	register_setting(
@@ -80,21 +98,6 @@ function alf_register_settings() {
 			'sanitize_callback' => 'alf_sanitize_settings',
 			'default'           => array(),
 		)
-	);
-
-	add_settings_section(
-		'alf_lobby_section',
-		__( 'Virtual Lobby', 'access-law-firm' ),
-		'__return_false',
-		'access-law-firm'
-	);
-
-	add_settings_field(
-		'lobby_open',
-		__( 'Virtual Lobby Open', 'access-law-firm' ),
-		'alf_field_lobby_open',
-		'access-law-firm',
-		'alf_lobby_section'
 	);
 
 	add_settings_section(
@@ -138,10 +141,12 @@ add_action( 'admin_init', 'alf_register_settings' );
  */
 function alf_twilio_section_intro() {
 	echo '<p>' . esc_html__( 'Enter your Twilio credentials to send the 6-digit verification code by SMS. Find these in your Twilio Console.', 'access-law-firm' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Receptionists manage the live queue under Virtual Lobby in the admin menu. Teams meeting URL is under Virtual Lobby → Settings.', 'access-law-firm' ) . '</p>';
 }
 
 /**
- * Sanitize settings before save.
+ * Sanitize Twilio settings before save.
+ * Does not change lobby_open — that is controlled from the Dashboard widget.
  *
  * @param array $input Raw input.
  * @return array
@@ -152,8 +157,7 @@ function alf_sanitize_settings( $input ) {
 		$existing = array();
 	}
 
-	$output               = $existing;
-	$output['lobby_open'] = ! empty( $input['lobby_open'] ) ? 1 : 0;
+	$output = $existing;
 
 	if ( isset( $input['twilio_sid'] ) ) {
 		$output['twilio_sid'] = sanitize_text_field( $input['twilio_sid'] );
@@ -162,7 +166,6 @@ function alf_sanitize_settings( $input ) {
 		$output['twilio_from'] = sanitize_text_field( $input['twilio_from'] );
 	}
 	if ( isset( $input['twilio_token'] ) ) {
-		// Keep existing token if the field was submitted empty (masked display).
 		$token = trim( $input['twilio_token'] );
 		if ( '' !== $token ) {
 			$output['twilio_token'] = sanitize_text_field( $token );
@@ -170,20 +173,6 @@ function alf_sanitize_settings( $input ) {
 	}
 
 	return $output;
-}
-
-/**
- * Render: lobby open toggle.
- */
-function alf_field_lobby_open() {
-	$value = alf_is_lobby_open();
-	?>
-	<label class="alf-switch">
-		<input type="checkbox" name="<?php echo esc_attr( ALF_OPTION_KEY ); ?>[lobby_open]" value="1" <?php checked( $value, true ); ?>>
-		<?php esc_html_e( 'Show "Virtual Lobby Open" in the site header', 'access-law-firm' ); ?>
-	</label>
-	<p class="description"><?php esc_html_e( 'When off, the header shows "Virtual Lobby Closed" and the check-in popup shows a closed notice.', 'access-law-firm' ); ?></p>
-	<?php
 }
 
 /**
@@ -210,7 +199,7 @@ function alf_field_text( $args ) {
  * @param array $args Field args.
  */
 function alf_field_password( $args ) {
-	$key      = $args['key'];
+	$key       = $args['key'];
 	$has_value = (bool) alf_get_setting( $key );
 	printf(
 		'<input type="password" class="regular-text" name="%1$s[%2$s]" value="" placeholder="%3$s" autocomplete="new-password">',
@@ -232,7 +221,7 @@ function alf_render_settings_page() {
 	}
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'Access Law Firm Settings', 'access-law-firm' ); ?></h1>
+		<h1><?php esc_html_e( 'Access Law Firm — Twilio SMS', 'access-law-firm' ); ?></h1>
 		<form action="options.php" method="post">
 			<?php
 			settings_fields( 'alf_settings_group' );
@@ -241,5 +230,73 @@ function alf_render_settings_page() {
 			?>
 		</form>
 	</div>
+	<?php
+}
+
+/* =========================================================
+ * Dashboard widget — Virtual Lobby Open / Closed (shortcut)
+ * Full queue lives under Virtual Lobby admin menu.
+ * ========================================================= */
+
+/**
+ * Register the dashboard widget.
+ */
+function alf_register_dashboard_widget() {
+	if ( ! function_exists( 'alf_user_can_manage_lobby' ) || ! alf_user_can_manage_lobby() ) {
+		return;
+	}
+
+	wp_add_dashboard_widget(
+		'alf_lobby_widget',
+		__( 'Virtual Lobby', 'access-law-firm' ),
+		'alf_render_dashboard_widget'
+	);
+}
+add_action( 'wp_dashboard_setup', 'alf_register_dashboard_widget' );
+
+/**
+ * Render the Virtual Lobby dashboard widget.
+ */
+function alf_render_dashboard_widget() {
+	$is_open = alf_is_lobby_open();
+	?>
+	<div class="alf-lobby-widget">
+		<p class="alf-lobby-widget-status">
+			<span class="alf-lobby-dot <?php echo $is_open ? 'is-open' : 'is-closed'; ?>" aria-hidden="true"></span>
+			<strong id="alf-lobby-status-label">
+				<?php
+				echo $is_open
+					? esc_html__( 'Virtual Lobby Open', 'access-law-firm' )
+					: esc_html__( 'Virtual Lobby Closed', 'access-law-firm' );
+				?>
+			</strong>
+		</p>
+		<p class="description">
+			<?php
+			printf(
+				/* translators: %s: Virtual Lobby admin URL */
+				esc_html__( 'Quick toggle. Manage the visitor queue under %s.', 'access-law-firm' ),
+				'<a href="' . esc_url( admin_url( 'admin.php?page=alf-virtual-lobby' ) ) . '">' . esc_html__( 'Virtual Lobby → Queue', 'access-law-firm' ) . '</a>'
+			);
+			?>
+		</p>
+		<p>
+			<label class="alf-lobby-toggle">
+				<input type="checkbox" id="alf-lobby-open-toggle" value="1" <?php checked( $is_open, true ); ?>>
+				<?php esc_html_e( 'Virtual Lobby Open', 'access-law-firm' ); ?>
+			</label>
+		</p>
+		<p id="alf-lobby-widget-message" class="alf-lobby-widget-message" hidden></p>
+	</div>
+	<style>
+		.alf-lobby-widget-status { display: flex; align-items: center; gap: 10px; font-size: 15px; margin-bottom: 8px; }
+		.alf-lobby-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: none; }
+		.alf-lobby-dot.is-open { background: #27b05d; box-shadow: 0 0 0 4px #eaf8ef; }
+		.alf-lobby-dot.is-closed { background: #d92d20; box-shadow: 0 0 0 4px #fdeceb; }
+		.alf-lobby-toggle { font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+		.alf-lobby-widget-message { margin-top: 8px; }
+		.alf-lobby-widget-message.is-success { color: #1a7f37; }
+		.alf-lobby-widget-message.is-error { color: #b42318; }
+	</style>
 	<?php
 }

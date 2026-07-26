@@ -82,8 +82,12 @@
       rawPhone: '',
       country: '+1',
       otp: '',
-      matter: ''
+      matter: '',
+      visitId: 0,
+      visitToken: '',
+      teamsUrl: ''
     };
+    var pollTimer = null;
 
     function showError(key, show, message) {
       var el = modal.querySelector('[data-error-for="' + key + '"]');
@@ -177,11 +181,12 @@
     }
 
     function closeModal() {
+      stopPolling();
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('lobby-open');
       // Reset for next visit
-      state = { name: '', phone: '', rawPhone: '', country: '+1', otp: '', matter: '' };
+      state = { name: '', phone: '', rawPhone: '', country: '+1', otp: '', matter: '', visitId: 0, visitToken: '', teamsUrl: '' };
       selectedMatter = '';
       var nameInput = document.getElementById('lobbyFullName');
       var phoneInput = document.getElementById('lobbyPhone');
@@ -263,6 +268,79 @@
       return true;
     }
 
+    function stopPolling() {
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    }
+
+    function updateWaitUi(position, statusLabel) {
+      var posEl = document.getElementById('lobbyWaitPosition');
+      var statusEl = document.getElementById('lobbyWaitStatus');
+      var noteEl = document.getElementById('lobbyWaitNote');
+      if (posEl) posEl.textContent = position ? '#' + position : '—';
+      if (statusEl) statusEl.textContent = statusLabel || 'Waiting';
+      if (noteEl && statusLabel === 'Waiting') {
+        noteEl.textContent = 'Waiting for the receptionist…';
+      }
+    }
+
+    function startPolling() {
+      stopPolling();
+      var tick = function () {
+        if (!state.visitId || !state.visitToken) return;
+        ajaxPost('alf_visit_status', {
+          visit_id: String(state.visitId),
+          token: state.visitToken
+        }).then(function (res) {
+          if (!res || !res.success) return;
+          var data = res.data || {};
+          updateWaitUi(data.position, data.status_label);
+          if (data.status === 'ready' || data.status === 'in_meeting') {
+            state.teamsUrl = data.teams_url || '';
+            stopPolling();
+            showStep(6);
+          } else if (data.status === 'dismissed' || data.status === 'completed') {
+            stopPolling();
+            var noteEl = document.getElementById('lobbyWaitNote');
+            if (noteEl) {
+              noteEl.textContent = data.status === 'dismissed'
+                ? 'This check-in was closed by the receptionist. Please try again later.'
+                : 'Your visit was marked complete.';
+            }
+          }
+        });
+      };
+      tick();
+      pollTimer = setInterval(tick, 5000);
+    }
+
+    function submitCheckIn(triggerBtn) {
+      if (busy) return;
+      if (!validateCurrent()) return;
+      clearErrors();
+      setBusy(triggerBtn, true, 'Checking in…');
+      ajaxPost('alf_check_in', {
+        name: state.name,
+        phone: state.rawPhone,
+        country: state.country,
+        matter: state.matter
+      }).then(function (res) {
+        setBusy(triggerBtn, false);
+        if (res && res.success) {
+          state.visitId = res.data.visit_id;
+          state.visitToken = res.data.token;
+          updateWaitUi(res.data.position, 'Waiting');
+          showStep(5);
+          startPolling();
+        } else {
+          var msg = res && res.data && res.data.message ? res.data.message : 'Could not check in. Please try again.';
+          showError('matter', true, msg);
+        }
+      });
+    }
+
     function sendOtp(triggerBtn) {
       if (busy) return;
       clearErrors();
@@ -317,6 +395,12 @@
       // Step 3: verify the SMS code via Twilio.
       if (currentStep === 3) {
         verifyOtp(triggerBtn);
+        return;
+      }
+
+      // Step 4: matter type → save check-in and wait in queue.
+      if (currentStep === 4) {
+        submitCheckIn(triggerBtn);
         return;
       }
 
@@ -393,11 +477,20 @@
       });
     });
 
-    // Join Reception (prototype)
+    // Join Reception — open Teams meeting
     modal.querySelectorAll('[data-lobby-join]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        alert('Prototype only — a Microsoft Teams meeting would open here for: ' + (state.name || 'guest'));
-        closeModal();
+        if (!state.teamsUrl) {
+          alert('The Teams meeting link is not available yet. Please wait a moment or contact the office.');
+          return;
+        }
+        if (state.visitId && state.visitToken) {
+          ajaxPost('alf_visit_joined', {
+            visit_id: String(state.visitId),
+            token: state.visitToken
+          });
+        }
+        window.open(state.teamsUrl, '_blank', 'noopener,noreferrer');
       });
     });
 
