@@ -46,6 +46,138 @@ function alf_register_receptionist_role() {
 add_action( 'after_setup_theme', 'alf_register_receptionist_role' );
 
 /**
+ * Whether the current user is a Receptionist (not a full Administrator).
+ *
+ * @return bool
+ */
+function alf_is_receptionist_user() {
+	$user = wp_get_current_user();
+	if ( ! $user || empty( $user->ID ) ) {
+		return false;
+	}
+	if ( user_can( $user, 'manage_options' ) ) {
+		return false;
+	}
+	return in_array( 'alf_receptionist', (array) $user->roles, true ) || user_can( $user, 'alf_manage_lobby' );
+}
+
+/**
+ * Receptionist Dashboard: remove every widget except Virtual Lobby.
+ */
+function alf_receptionist_dashboard_widgets() {
+	if ( ! alf_is_receptionist_user() ) {
+		return;
+	}
+
+	global $wp_meta_boxes;
+
+	if ( empty( $wp_meta_boxes['dashboard'] ) || ! is_array( $wp_meta_boxes['dashboard'] ) ) {
+		return;
+	}
+
+	foreach ( $wp_meta_boxes['dashboard'] as $context => $priorities ) {
+		if ( ! is_array( $priorities ) ) {
+			continue;
+		}
+		foreach ( $priorities as $priority => $boxes ) {
+			if ( ! is_array( $boxes ) ) {
+				continue;
+			}
+			foreach ( array_keys( $boxes ) as $box_id ) {
+				if ( 'alf_lobby_widget' === $box_id ) {
+					continue;
+				}
+				remove_meta_box( $box_id, 'dashboard', $context );
+			}
+		}
+	}
+}
+add_action( 'wp_dashboard_setup', 'alf_receptionist_dashboard_widgets', 999 );
+
+/**
+ * Hide the WordPress Welcome panel for Receptionists.
+ */
+function alf_receptionist_hide_welcome_panel() {
+	if ( alf_is_receptionist_user() ) {
+		remove_action( 'welcome_panel', 'wp_welcome_panel' );
+	}
+}
+add_action( 'admin_head-index.php', 'alf_receptionist_hide_welcome_panel' );
+
+/**
+ * Receptionist admin menu: keep only Dashboard + Virtual Lobby (+ profile via admin bar).
+ */
+function alf_receptionist_admin_menu() {
+	if ( ! alf_is_receptionist_user() ) {
+		return;
+	}
+
+	global $menu, $submenu;
+
+	$allowed = array(
+		'index.php',           // Dashboard
+		'alf-virtual-lobby',   // Virtual Lobby
+		'profile.php',         // Profile (if present)
+	);
+
+	if ( is_array( $menu ) ) {
+		foreach ( $menu as $key => $item ) {
+			$slug = isset( $item[2] ) ? $item[2] : '';
+			if ( ! in_array( $slug, $allowed, true ) ) {
+				remove_menu_page( $slug );
+			}
+		}
+	}
+
+	// Hide Screen Options / help clutter is optional; keep Profile under Users if WP added it.
+	if ( isset( $submenu['alf-virtual-lobby'] ) && is_array( $submenu['alf-virtual-lobby'] ) ) {
+		foreach ( $submenu['alf-virtual-lobby'] as $sub ) {
+			// Settings submenu requires manage_options — already hidden for receptionist.
+		}
+	}
+}
+add_action( 'admin_menu', 'alf_receptionist_admin_menu', 999 );
+
+/**
+ * Redirect Receptionist away from blocked admin screens to Virtual Lobby.
+ */
+function alf_receptionist_block_admin_screens() {
+	// Never interfere with AJAX, cron, or REST.
+	if ( wp_doing_ajax() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || wp_doing_cron() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+		return;
+	}
+
+	if ( ! alf_is_receptionist_user() || ! is_admin() ) {
+		return;
+	}
+
+	global $pagenow;
+
+	// Allow admin-ajax and other system endpoints.
+	if ( in_array( $pagenow, array( 'admin-ajax.php', 'async-upload.php', 'admin-post.php' ), true ) ) {
+		return;
+	}
+
+	$allowed_pages = array( 'alf-virtual-lobby' );
+	$page          = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+	$ok = false;
+	if ( 'index.php' === $pagenow ) {
+		$ok = true;
+	} elseif ( 'admin.php' === $pagenow && in_array( $page, $allowed_pages, true ) ) {
+		$ok = true;
+	} elseif ( in_array( $pagenow, array( 'profile.php', 'user-edit.php' ), true ) ) {
+		$ok = true;
+	}
+
+	if ( ! $ok ) {
+		wp_safe_redirect( admin_url( 'admin.php?page=alf-virtual-lobby' ) );
+		exit;
+	}
+}
+add_action( 'admin_init', 'alf_receptionist_block_admin_screens' );
+
+/**
  * Register Virtual Lobby admin menus.
  */
 function alf_register_lobby_admin_menu() {
@@ -318,7 +450,7 @@ function alf_render_lobby_queue_page() {
  */
 function alf_enqueue_lobby_admin_assets( $hook ) {
 	$on_dashboard = ( 'index.php' === $hook );
-	$on_console   = ( false !== strpos( $hook, 'alf-virtual-lobby' ) );
+	$on_console   = ( is_string( $hook ) && false !== strpos( $hook, 'alf-virtual-lobby' ) );
 
 	if ( ! $on_dashboard && ! $on_console ) {
 		return;
@@ -326,6 +458,13 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
 	if ( ! alf_user_can_manage_lobby() ) {
 		return;
 	}
+
+	$cfg = wp_json_encode(
+		array(
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			'nonce'   => wp_create_nonce( 'alf_lobby_admin' ),
+		)
+	);
 
 	$js = <<<'JS'
 (function () {
@@ -352,7 +491,15 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
       body: body.toString()
-    }).then(function (r) { return r.json(); });
+    }).then(function (r) {
+      return r.text().then(function (text) {
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          return { success: false, data: { message: 'Unexpected response. Please reload and try again.' } };
+        }
+      });
+    });
   }
 
   if (toggle) {
@@ -363,21 +510,21 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
       post('alf_toggle_lobby', { lobby_open: String(open) }).then(function (res) {
         toggle.disabled = false;
         if (res && res.success) {
-          var isOpen = !!res.data.open;
+          var isOpen = !!(res.data && res.data.open);
           toggle.checked = isOpen;
           if (label) label.textContent = isOpen ? 'Virtual Lobby Open' : 'Virtual Lobby Closed';
           if (dot) {
             dot.classList.toggle('is-open', isOpen);
             dot.classList.toggle('is-closed', !isOpen);
           }
-          setMessage(res.data.message || 'Saved.', true);
+          setMessage((res.data && res.data.message) || 'Saved.', true);
         } else {
-          toggle.checked = !toggle.checked;
+          toggle.checked = !open;
           setMessage((res && res.data && res.data.message) || 'Could not save.', false);
         }
       }).catch(function () {
         toggle.disabled = false;
-        toggle.checked = !toggle.checked;
+        toggle.checked = !open;
         setMessage('Network error.', false);
       });
     });
@@ -454,17 +601,10 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
 })();
 JS;
 
-	wp_register_script( 'alf-lobby-admin', false, array(), ALF_THEME_VERSION, true );
+	wp_register_script( 'alf-lobby-admin', '', array(), ALF_THEME_VERSION, true );
 	wp_enqueue_script( 'alf-lobby-admin' );
-	wp_add_inline_script( 'alf-lobby-admin', $js );
-	wp_localize_script(
-		'alf-lobby-admin',
-		'alfLobbyAdmin',
-		array(
-			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-			'nonce'   => wp_create_nonce( 'alf_lobby_admin' ),
-		)
-	);
+	wp_add_inline_script( 'alf-lobby-admin', 'window.alfLobbyAdmin = ' . $cfg . ';', 'before' );
+	wp_add_inline_script( 'alf-lobby-admin', $js, 'after' );
 }
 add_action( 'admin_enqueue_scripts', 'alf_enqueue_lobby_admin_assets' );
 
@@ -472,18 +612,21 @@ add_action( 'admin_enqueue_scripts', 'alf_enqueue_lobby_admin_assets' );
  * AJAX: toggle Virtual Lobby open/closed.
  */
 function alf_ajax_toggle_lobby() {
-	check_ajax_referer( 'alf_lobby_admin', 'nonce' );
+	if ( ! check_ajax_referer( 'alf_lobby_admin', 'nonce', false ) ) {
+		wp_send_json_error( array( 'message' => __( 'Security check failed. Please reload the page and try again.', 'access-law-firm' ) ), 403 );
+	}
 
 	if ( ! alf_user_can_manage_lobby() ) {
 		wp_send_json_error( array( 'message' => __( 'You do not have permission to change this.', 'access-law-firm' ) ), 403 );
 	}
 
-	$open = ! empty( $_POST['lobby_open'] ) ? 1 : 0;
+	// Do not use empty() — PHP empty("0") is true and would always force Closed.
+	$open = ( isset( $_POST['lobby_open'] ) && (string) wp_unslash( $_POST['lobby_open'] ) === '1' ) ? 1 : 0;
 	alf_update_setting( 'lobby_open', $open );
 
 	wp_send_json_success(
 		array(
-			'open'    => (bool) $open,
+			'open'    => ( 1 === $open ),
 			'message' => $open
 				? __( 'Virtual Lobby is now Open.', 'access-law-firm' )
 				: __( 'Virtual Lobby is now Closed.', 'access-law-firm' ),
