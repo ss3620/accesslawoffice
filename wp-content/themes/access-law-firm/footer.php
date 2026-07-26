@@ -41,11 +41,11 @@
 		<div class="lobby-step active" data-step="0">
 			<div class="lobby-welcome">
 				<div class="lobby-brand-mark" aria-hidden="true">A</div>
-				<div class="eyebrow" style="color:#f0bd5d">Access Law Firm</div>
+				<div class="eyebrow" style="color:#f0bd5d">Virtual Lobby Experience</div>
 
 				<div data-lobby-welcome-open <?php echo $alf_lobby_open ? '' : 'hidden'; ?>>
 					<h2 id="lobbyModalTitle">Welcome to our Virtual Reception</h2>
-					<p>Check in securely to speak with our live receptionist and connect with the attorney.</p>
+					<p>A live receptionist will greet you before you speak with your attorney.</p>
 					<div class="lobby-status-box">
 						<strong>Estimated Wait 12–18 Minutes</strong>
 						<div class="lobby-status-row">
@@ -71,6 +71,49 @@
 					<a class="btn btn-secondary" href="tel:+17134892089" style="width:100%">Call the Office</a>
 				</div>
 			</div>
+
+			<div class="lobby-info-panels">
+				<div class="lobby-info-card lobby-info-hours">
+					<strong>Lobby Hours</strong>
+					<p><span>Monday–Friday</span><span>9:00 AM – 5:00 PM</span></p>
+					<p><span>Saturday–Sunday</span><span>10:00 AM – 3:00 PM</span></p>
+					<small>Our virtual lobby stays open until 3:30 PM on weekends.</small>
+				</div>
+				<div class="lobby-info-card lobby-info-virtual">
+					<strong>100% Virtual</strong>
+					<p>All meetings are conducted online. No in-person appointments.</p>
+				</div>
+			</div>
+
+			<details class="lobby-next-details">
+				<summary>What happens next (inside Microsoft Teams)</summary>
+				<ol class="lobby-next-list">
+					<li>
+						<strong>Join Reception</strong>
+						<span>You’ll join a secure Microsoft Teams meeting with our receptionist.</span>
+					</li>
+					<li>
+						<strong>Receptionist Greets You</strong>
+						<span>They will verify some information and answer your initial questions.</span>
+					</li>
+					<li>
+						<strong>Transferred to Attorney Waiting Room</strong>
+						<span>After intake, you are moved to the attorney waiting room.</span>
+					</li>
+					<li>
+						<strong>Attorney Will Admit You</strong>
+						<span>You wait until the attorney is ready to see you.</span>
+					</li>
+					<li>
+						<strong>Consultation</strong>
+						<span>You’re admitted into the attorney’s meeting for your consultation.</span>
+					</li>
+					<li>
+						<strong>Meeting Ends</strong>
+						<span>When your meeting is complete, the call will end.</span>
+					</li>
+				</ol>
+			</details>
 		</div>
 
 		<!-- Step 1: Name (1 of 4) -->
@@ -247,7 +290,7 @@
 				</svg>
 			</div>
 			<h3 class="lobby-step-title">You're Checked In!</h3>
-			<p class="lobby-step-desc">A receptionist will be with you shortly. Please keep this window open.</p>
+			<p class="lobby-step-desc">Thank you. A receptionist will be with you shortly.</p>
 			<div class="lobby-confirm-stats">
 				<div>
 					<strong>Status</strong>
@@ -258,7 +301,9 @@
 					<span id="lobbyWaitPosition">—</span>
 				</div>
 			</div>
-			<p class="note" id="lobbyWaitNote" style="text-align:center;margin-top:14px">Waiting for the receptionist…</p>
+			<p class="lobby-remain">Please remain on this page · Estimated wait about 12 minutes</p>
+			<div class="lobby-pulse" aria-hidden="true"><span></span><span></span><span></span></div>
+			<p class="note" id="lobbyWaitNote" style="text-align:center;margin-top:10px">Waiting for the receptionist…</p>
 		</div>
 
 		<!-- Step 6: Reception ready -->
@@ -270,7 +315,7 @@
 				</svg>
 			</div>
 			<h3 class="lobby-step-title">Your Receptionist Is Ready</h3>
-			<p class="lobby-step-desc">Join the secure virtual reception to speak with our live assistant.</p>
+			<p class="lobby-step-desc">A member of our team is ready to assist you. Click below to join your secure video reception.</p>
 			<div class="lobby-actions">
 				<button class="btn btn-gold" type="button" data-lobby-join>
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>

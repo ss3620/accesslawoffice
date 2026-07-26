@@ -89,6 +89,36 @@
   })();
 
   /* ------------------------------------------------------------------ */
+  /* Mobile navigation                                                    */
+  /* ------------------------------------------------------------------ */
+  (function initMobileNav() {
+    var toggle = document.querySelector('.nav-toggle');
+    var nav = document.getElementById('primaryNav');
+    if (!toggle || !nav) return;
+
+    function closeNav() {
+      nav.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'Open menu');
+    }
+
+    toggle.addEventListener('click', function () {
+      var open = !nav.classList.contains('is-open');
+      nav.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    });
+
+    nav.querySelectorAll('a, .open-lobby').forEach(function (el) {
+      el.addEventListener('click', closeNav);
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 900) closeNav();
+    });
+  })();
+
+  /* ------------------------------------------------------------------ */
   /* Flip credential cards                                                */
   /* ------------------------------------------------------------------ */
   document.querySelectorAll('.flip-card').forEach(function (card) {

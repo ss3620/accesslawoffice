@@ -20,7 +20,10 @@
 			<div class="logo">A</div>
 			<span>ACCESS<small>LAW FIRM</small></span>
 		</a>
-		<nav class="navlinks" aria-label="Primary">
+		<button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="primaryNav">
+			<span></span><span></span><span></span>
+		</button>
+		<nav class="navlinks" id="primaryNav" aria-label="Primary">
 			<a href="#home">Home</a>
 			<a href="#about">About</a>
 			<a href="#practice">Practice Areas</a>
