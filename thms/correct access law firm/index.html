@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Access Law Firm — Interactive Credentials</title>
+<style>
+:root{--navy:#082c62;--blue:#0d4ca3;--gold:#c9922f;--ink:#0f1d36;--muted:#5d6b81;--line:#dfe7f1;--soft:#f7faff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);line-height:1.55}a{text-decoration:none;color:inherit}.container{width:min(1180px,calc(100% - 40px));margin:auto}.eyebrow{font-size:.82rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}h1,h2,h3{margin:0;line-height:1.06}h1,h2{font-family:Georgia,serif}h1{font-size:clamp(3rem,6vw,5.6rem)}h2{font-size:clamp(2rem,4vw,3.4rem)}p{margin:0}.btn{border:0;border-radius:13px;padding:14px 20px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px}.btn-primary{background:var(--blue);color:#fff}.btn-secondary{background:#fff;color:var(--navy);border:1px solid #bfcce0}.btn-gold{background:linear-gradient(135deg,#b9801c,#d9aa50);color:#fff}header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.nav{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.18em}.logo{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,var(--blue),var(--navy));font:700 1.7rem Georgia;position:relative}.logo:after{content:"";position:absolute;width:34px;height:4px;background:var(--gold);transform:rotate(-18deg);border-radius:8px}.brand small{display:block;font-size:.61rem;letter-spacing:.32em;color:var(--muted)}.navlinks{display:flex;gap:24px;align-items:center;font-size:.91rem;font-weight:600}.status{display:flex;gap:8px;align-items:center;color:#24743a;font-weight:700;font-size:.85rem}.dot{width:9px;height:9px;border-radius:50%;background:#27b05d;box-shadow:0 0 0 5px #eaf8ef}.hero{padding:72px 0 30px;background:radial-gradient(circle at 80% 20%,rgba(201,146,47,.11),transparent 22%),radial-gradient(circle at 68% 18%,rgba(13,76,163,.10),transparent 26%),linear-gradient(#fff,#fbfdff)}.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:center}.hero h1 span{color:var(--blue)}.hero-copy>p{font-size:1.12rem;max-width:640px;margin:25px 0;color:#3c4a61}.actions{display:flex;flex-wrap:wrap;gap:12px}.portrait{min-height:565px;border-radius:34px;position:relative;overflow:hidden;box-shadow:0 18px 55px rgba(18,42,78,.12);background:linear-gradient(150deg,#f4f8fd,#fff1db)}.portrait img{width:100%;height:100%;object-fit:cover;object-position:center top;position:absolute;inset:0}.availability{position:absolute;right:22px;bottom:24px;background:rgba(255,255,255,.95);border-radius:18px;padding:16px 18px;box-shadow:0 16px 40px rgba(9,44,98,.18);min-width:260px}.availability strong{display:block}.availability small{color:#278143}.credstrip{margin-top:26px;background:#fff;border:1px solid var(--line);box-shadow:0 18px 55px rgba(18,42,78,.12);border-radius:18px;display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden}.cred{padding:22px;display:flex;gap:13px;align-items:flex-start}.cred+.cred{border-left:1px solid var(--line)}.icon{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#edf4ff;color:var(--blue);font-size:1.2rem;flex:none}.cred b{display:block;font-size:.9rem}.cred span{font-size:.78rem;color:var(--muted)}section{padding:82px 0}.section-title{text-align:center;max-width:760px;margin:0 auto 42px}.section-title p{margin-top:14px;color:var(--muted)}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.step{text-align:center;padding:18px;position:relative}.number{width:42px;height:42px;border-radius:50%;margin:0 auto 16px;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:800}.step p,.card p,.timeline span{font-size:.88rem;color:var(--muted)}.step:not(:last-child):after{content:"→";position:absolute;right:-14px;top:27px;color:var(--gold);font-size:1.6rem}.practice{background:var(--soft)}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:25px;min-height:165px}.card .icon{margin-bottom:20px}.card h3{font-size:1.05rem;margin-bottom:8px}.stats{background:linear-gradient(135deg,var(--navy),#0d438f);color:#fff;border-radius:24px;padding:38px;display:grid;grid-template-columns:repeat(3,1fr);text-align:center}.stat+.stat{border-left:1px solid rgba(255,255,255,.22)}.stat b{font-size:2.2rem;color:#f4b847;display:block}.about-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:46px;align-items:center}.about-photo{border-radius:26px;overflow:hidden;min-height:470px;background:linear-gradient(145deg,#edf4ff,#f8efe0);box-shadow:0 18px 55px rgba(18,42,78,.12)}.about-photo img{width:100%;height:100%;object-fit:cover;object-position:center top}.timeline{margin-top:30px;display:grid;gap:18px}.timeline-item{display:grid;grid-template-columns:26px 1fr;gap:14px}.timeline-item:before{content:"";width:14px;height:14px;border-radius:50%;margin-top:5px;background:var(--gold);box-shadow:0 0 0 6px #f8efe0}.timeline-item b{display:block}.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}details{border:1px solid var(--line);border-radius:14px;padding:17px 18px;background:#fff;margin-bottom:12px}summary{cursor:pointer;font-weight:700}details p{padding-top:12px;color:var(--muted);font-size:.92rem}.cta{padding:34px;border-radius:22px;background:linear-gradient(135deg,#f8efe0,#fff);border:1px solid #ead8b5}.cta h3{font:700 2rem Georgia}.hours{margin:18px 0;color:var(--muted)}footer{background:var(--navy);color:#fff;padding:36px 0}.footer-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:28px}footer p,footer a{font-size:.88rem;color:#dbe6f5}.modal{display:none;position:fixed;inset:0;background:rgba(4,21,49,.68);z-index:100;align-items:center;justify-content:center;padding:20px}.modal.open{display:flex}.modal-card{background:#fff;border-radius:22px;max-width:560px;width:100%;padding:30px;box-shadow:0 30px 90px rgba(0,0,0,.3)}.modal-top{display:flex;justify-content:space-between;align-items:start}.close{border:0;background:#edf2f8;width:38px;height:38px;border-radius:50%;cursor:pointer}.field{margin-top:18px}label{display:block;font-size:.86rem;font-weight:700;margin-bottom:7px}input,select{width:100%;border:1px solid #cdd8e7;border-radius:12px;padding:13px 14px;font:inherit}.note{font-size:.78rem;color:var(--muted);margin-top:12px}@media(max-width:900px){.navlinks{display:none}.hero-grid,.about-grid,.faq-grid{grid-template-columns:1fr}.credstrip,.cards{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:repeat(2,1fr)}.step:after{display:none}}@media(max-width:620px){.container{width:min(100% - 26px,1180px)}h1{font-size:2.75rem}.portrait{min-height:450px}.credstrip,.cards,.steps,.stats,.footer-grid{grid-template-columns:1fr}.cred+.cred{border-left:0;border-top:1px solid var(--line)}.stat+.stat{border-left:0;border-top:1px solid rgba(255,255,255,.22);padding-top:24px;margin-top:24px}.actions .btn{width:100%}.availability{left:14px;right:14px;min-width:auto}.status{display:none}}
+
+    /* Refined credential emphasis: same layout, stronger hierarchy */
+    .cred-strip{
+      margin-top:34px;
+      border-radius:22px;
+    }
+    .cred{
+      padding:30px 24px;
+      min-height:145px;
+      align-items:center;
+    }
+    .cred .icon{
+      width:54px;
+      height:54px;
+      font-size:1.4rem;
+      background:linear-gradient(145deg,var(--blue-2),#fff7e8);
+      border:1px solid #d9e4f2;
+    }
+    .cred b{
+      font-size:1.08rem;
+      line-height:1.22;
+      letter-spacing:.01em;
+      color:var(--navy);
+      margin-bottom:7px;
+    }
+    .cred span{
+      font-size:.84rem;
+      line-height:1.35;
+    }
+    .cred:first-child{
+      background:linear-gradient(135deg,#f7fbff,#fffaf0);
+    }
+    .cred:first-child b{
+      font-size:1.18rem;
+    }
+    @media (max-width:900px){
+      .cred{min-height:130px}
+    }
+    @media (max-width:620px){
+      .cred{
+        min-height:auto;
+        padding:24px 20px;
+      }
+      .cred b{font-size:1rem}
+      .cred:first-child b{font-size:1.08rem}
+    }
+
+  
+.flip-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px}
+.flip-card{min-height:180px;padding:0;border:0;background:transparent;perspective:1100px;cursor:pointer;text-align:left}
+.flip-card-inner{position:relative;display:block;width:100%;height:100%;min-height:180px;transition:transform .58s cubic-bezier(.2,.75,.25,1);transform-style:preserve-3d}
+.flip-card:hover .flip-card-inner,.flip-card:focus-visible .flip-card-inner,.flip-card.is-flipped .flip-card-inner{transform:rotateY(180deg)}
+.flip-card-face{position:absolute;inset:0;display:flex;border:1px solid var(--line);border-radius:20px;background:#fff;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 14px 34px rgba(18,42,78,.09)}
+.flip-card-front{align-items:center;gap:16px;padding:24px 20px}
+.flip-card-front .icon{width:56px;height:56px;flex:0 0 auto;font-size:1.45rem;background:linear-gradient(145deg,var(--blue2),#fff7e8);border:1px solid #d9e4f2}
+.credential-copy{display:flex;flex-direction:column;min-width:0}
+.credential-copy b{color:var(--navy);font-size:1.08rem;line-height:1.2}
+.credential-copy span{margin-top:6px;color:var(--muted);font-size:.8rem;line-height:1.35}
+.credential-copy em{margin-top:12px;color:var(--gold);font-size:.7rem;font-style:normal;font-weight:700;letter-spacing:.04em}
+.flip-card-back{transform:rotateY(180deg);flex-direction:column;justify-content:center;padding:22px;color:#fff;background:linear-gradient(145deg,var(--navy),var(--blue));border-color:transparent}
+.flip-card-back b{color:#f0bd5d;font-size:1rem;margin-bottom:10px}
+.flip-card-back span{position:relative;padding-left:15px;font-size:.78rem;line-height:1.4;color:#eef4fc;margin-top:5px}
+.flip-card-back span:before{content:"";position:absolute;left:0;top:.55em;width:5px;height:5px;border-radius:50%;background:#f0bd5d}
+@media(max-width:900px){.flip-strip{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.flip-strip{grid-template-columns:1fr}.flip-card,.flip-card-inner{min-height:165px}.flip-card:hover .flip-card-inner{transform:none}.flip-card.is-flipped .flip-card-inner,.flip-card:focus-visible .flip-card-inner{transform:rotateY(180deg)}}
+
+.icon-svg svg{width:27px;height:27px;display:block}
+.flip-card-front .icon-svg{color:var(--blue)}
+
+.practice-svg svg{
+  width:28px;
+  height:28px;
+  display:block;
+}
+.practice .card .practice-svg{
+  color:var(--blue);
+}
+
+/* Practice cards: static, clickable, and easy to scan */
+.practice-card{
+  appearance:none;
+  width:100%;
+  text-align:left;
+  font:inherit;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition:transform .24s ease, border-color .24s ease, box-shadow .24s ease;
+}
+.practice-card::after{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:0;
+  width:100%;
+  height:3px;
+  background:currentColor;
+  transform:scaleX(0);
+  transform-origin:left;
+  transition:transform .24s ease;
+  opacity:.75;
+}
+.practice-card:hover,
+.practice-card:focus-visible{
+  transform:translateY(-6px);
+  border-color:rgba(24,73,135,.45);
+  box-shadow:0 18px 38px rgba(16,42,78,.12);
+  outline:none;
+}
+.practice-card:hover::after,
+.practice-card:focus-visible::after{
+  transform:scaleX(1);
+}
+.practice-link{
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  margin-top:1rem;
+  font-weight:700;
+  color:var(--blue);
+  opacity:.72;
+  transform:translateY(4px);
+  transition:opacity .24s ease, transform .24s ease;
+}
+.practice-card:hover .practice-link,
+.practice-card:focus-visible .practice-link{
+  opacity:1;
+  transform:translateY(0);
+}
+.practice-link span{
+  transition:transform .24s ease;
+}
+.practice-card:hover .practice-link span,
+.practice-card:focus-visible .practice-link span{
+  transform:translateX(4px);
+}
+.practice-modal{
+  position:fixed;
+  inset:0;
+  z-index:1200;
+  display:none;
+  place-items:center;
+  padding:24px;
+}
+.practice-modal.is-open{
+  display:grid;
+}
+.practice-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(5,18,37,.66);
+  backdrop-filter:blur(4px);
+}
+.practice-modal-panel{
+  position:relative;
+  width:min(620px,100%);
+  background:#fff;
+  border-radius:20px;
+  padding:38px;
+  box-shadow:0 28px 80px rgba(0,0,0,.28);
+  animation:practiceModalIn .22s ease both;
+}
+.practice-modal-panel h2{
+  margin:.4rem 0 1rem;
+}
+.practice-modal-panel p{
+  font-size:1.05rem;
+  line-height:1.75;
+  margin-bottom:1.5rem;
+}
+.practice-modal-close{
+  position:absolute;
+  top:14px;
+  right:16px;
+  border:0;
+  background:transparent;
+  font-size:2rem;
+  line-height:1;
+  cursor:pointer;
+  color:inherit;
+}
+@keyframes practiceModalIn{
+  from{opacity:0;transform:translateY(14px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@media (prefers-reduced-motion:reduce){
+  .practice-card,.practice-card::after,.practice-link,.practice-link span{transition:none}
+  .practice-modal-panel{animation:none}
+}
+.founder-section{align-items:stretch}.founder-photo{position:relative;min-height:520px}.founder-photo-label{position:absolute;left:22px;right:22px;bottom:22px;padding:18px 20px;border-radius:16px;background:rgba(8,44,98,.92);color:#fff}.founder-photo-label strong{display:block;font-size:1.55rem;line-height:1.1}.founder-photo-label span{display:block;margin-top:4px;opacity:.85}.founder-copy{display:flex;flex-direction:column;justify-content:center}.founder-intro{margin-top:18px;font-size:1.08rem;color:var(--ink)}.founder-copy>p:not(.founder-intro){color:var(--muted)}.founder-highlights{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:26px 0}.founder-highlights>div{padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}.founder-highlights strong{display:block;color:var(--navy);margin-bottom:4px}.founder-highlights span{display:block;color:var(--muted);font-size:.94rem;line-height:1.4}.founder-quote{margin:2px 0 0;padding:18px 20px;border-left:4px solid var(--gold);border-radius:0 12px 12px 0;background:#fffaf1;color:var(--navy);font-size:1.02rem;font-style:italic}@media(max-width:760px){.founder-photo{min-height:380px}.founder-highlights{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="container nav"><a class="brand" href="#home"><div class="logo">A</div><span>ACCESS<small>LAW FIRM</small></span></a><nav class="navlinks"><a href="#home">Home</a><a href="#about">About</a><a href="#practice">Practice Areas</a><a href="#faq">FAQ</a><button class="btn btn-primary open-lobby">Join Virtual Lobby</button></nav><div class="status"><span class="dot"></span>Virtual Lobby Open</div></div></header>
+<main id="home">
+<section class="hero"><div class="container"><div class="hero-grid"><div class="hero-copy"><div class="eyebrow">Former Immigration Judge</div><h1>Experience From Every Side of the <span>Immigration System.</span></h1><p>Strategic, compassionate representation informed by federal service as an Immigration Judge, Asylum Officer, and USCIS Immigration Officer.</p><div class="actions"><button class="btn btn-primary open-lobby">Join Virtual Lobby</button><a class="btn btn-secondary" href="tel:+17134892089">Call Now</a></div></div><div class="portrait"><img src="stock-attorney.jpg" alt="Attorney portrait"><div class="availability"><strong>Virtual Lobby Open</strong><span>Live assistant available</span><br><small>● Average wait: approximately 4 minutes</small></div></div></div><div class="credstrip flip-strip" aria-label="Professional experience">
+<button class="flip-card" type="button" aria-pressed="false"><span class="flip-card-inner"><span class="flip-card-face flip-card-front"><span class="icon icon-svg" aria-hidden="true">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M12 3v17"/>
+  <path d="M6 6h12"/>
+  <path d="m6 6-3 6h6L6 6Z"/>
+  <path d="m18 6-3 6h6l-3-6Z"/>
+  <path d="M8 21h8"/>
+</svg>
+</span><span class="credential-copy"><b>Former Immigration Judge</b><span>Immigration Court</span></span></span><span class="flip-card-face flip-card-back"><b>Immigration Judge Experience</b><span>Decided immigration cases</span><span>Conducted bond hearings</span><span>Issued oral and written decisions</span></span></span></button>
+<button class="flip-card" type="button" aria-pressed="false"><span class="flip-card-inner"><span class="flip-card-face flip-card-front"><span class="icon icon-svg" aria-hidden="true">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="9"/>
+  <path d="M3 12h18"/>
+  <path d="M12 3c2.6 2.4 4 5.4 4 9s-1.4 6.6-4 9"/>
+  <path d="M12 3c-2.6 2.4-4 5.4-4 9s1.4 6.6 4 9"/>
+</svg>
+</span><span class="credential-copy"><b>Former Asylum Officer</b><span>U.S. Department of Homeland Security</span></span></span><span class="flip-card-face flip-card-back"><b>Asylum Officer Experience</b><span>Interviewed asylum applicants</span><span>Evaluated credibility and evidence</span><span>Assessed eligibility for protection</span></span></span></button>
+<button class="flip-card" type="button" aria-pressed="false"><span class="flip-card-inner"><span class="flip-card-face flip-card-front"><span class="icon icon-svg" aria-hidden="true">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="5" y="3" width="14" height="18" rx="2"/>
+  <path d="M9 3v18"/>
+  <circle cx="14" cy="11" r="3"/>
+  <path d="M11 11h6"/>
+  <path d="M14 8c.8.9 1.2 1.9 1.2 3s-.4 2.1-1.2 3"/>
+  <path d="M14 8c-.8.9-1.2 1.9-1.2 3s.4 2.1 1.2 3"/>
+</svg>
+</span><span class="credential-copy"><b>Former Immigration Officer</b><span>U.S. Citizenship and Immigration Services</span></span></span><span class="flip-card-face flip-card-back"><b>Immigration Officer Experience</b><span>Reviewed immigration applications and petitions</span><span>Conducted applicant interviews</span><span>Determined eligibility under immigration law</span></span></span></button>
+<button class="flip-card" type="button" aria-pressed="false">
+  <span class="flip-card-inner">
+    <span class="flip-card-face flip-card-front">
+      <span class="icon icon-svg" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="7" r="3"/>
+          <path d="M6.5 20v-2.5A4.5 4.5 0 0 1 11 13h2a4.5 4.5 0 0 1 4.5 4.5V20"/>
+          <path d="M4 11h3"/>
+          <path d="M17 11h3"/>
+        </svg>
+      </span>
+      <span class="credential-copy">
+        <b>Former Supervisory Immigration Services Officer</b>
+        <span>U.S. Citizenship and Immigration Services</span>
+      </span>
+    </span>
+    <span class="flip-card-face flip-card-back">
+      <b>Supervisory USCIS Experience</b>
+      <span>Supervised immigration officers</span>
+      <span>Reviewed complex immigration matters</span>
+      <span>Oversaw USCIS adjudications</span>
+    </span>
+  </span>
+</button>
+</div></div></section>
+<section><div class="container"><div class="section-title"><div class="eyebrow">Start Here</div><h2>A simpler way to reach your lawyer.</h2><p>Enter the Virtual Lobby, verify your phone number, speak with a live assistant, and connect with the attorney.</p></div><div class="steps"><div class="step"><div class="number">1</div><h3>Join Lobby</h3><p>Check in through the secure Virtual Lobby.</p></div><div class="step"><div class="number">2</div><h3>Verify Phone</h3><p>Confirm your U.S. phone number for security.</p></div><div class="step"><div class="number">3</div><h3>Live Assistant</h3><p>A team member greets you and gathers details.</p></div><div class="step"><div class="number">4</div><h3>Talk to Attorney</h3><p>Speak with the attorney or arrange the next step.</p></div></div></div></section>
+
+<section class="practice" id="practice">
+  <div class="container">
+    <div class="section-title">
+      <div class="eyebrow">Practice Areas</div>
+      <h2>Immigration representation built around your case.</h2>
+    </div>
+
+    <div class="cards practice-cards">
+      <button class="card practice-card" type="button"
+        data-title="Removal Defense"
+        data-details="Defense in detained and non-detained Immigration Court proceedings, including bond hearings, asylum, cancellation of removal, adjustment of status, voluntary departure, and other available relief.">
+        <div class="icon practice-svg" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3 4.5 6v5.7c0 4.6 3.1 7.5 7.5 9.3 4.4-1.8 7.5-4.7 7.5-9.3V6L12 3Z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <h3>Removal Defense</h3>
+        <p>Defense in Immigration Court, including detained and non-detained proceedings.</p>
+        <span class="practice-link">Learn More <span aria-hidden="true">→</span></span>
+      </button>
+
+      <button class="card practice-card" type="button"
+        data-title="Asylum"
+        data-details="Representation for asylum, withholding of removal, and protection under the Convention Against Torture, including preparation for interviews and Immigration Court hearings.">
+        <div class="icon practice-svg" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M3 12h18"/>
+            <path d="M12 3c2.5 2.4 4 5.4 4 9s-1.5 6.6-4 9"/>
+            <path d="M12 3c-2.5 2.4-4 5.4-4 9s1.5 6.6 4 9"/>
+          </svg>
+        </div>
+        <h3>Asylum</h3>
+        <p>Protection for people facing persecution or serious harm in their home country.</p>
+        <span class="practice-link">Learn More <span aria-hidden="true">→</span></span>
+      </button>
+
+      <button class="card practice-card" type="button"
+        data-title="Family Immigration"
+        data-details="Family-based petitions and green card matters for spouses, parents, children, fiancé(e)s, and other qualifying relatives, including consular processing and adjustment of status.">
+        <div class="icon practice-svg" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8" r="3"/>
+            <circle cx="17" cy="9" r="2.5"/>
+            <path d="M3.5 19c.5-3.4 2.5-5 5.5-5s5 1.6 5.5 5"/>
+            <path d="M14 15c.8-.7 1.8-1 3-1 2.3 0 3.8 1.4 4 4"/>
+          </svg>
+        </div>
+        <h3>Family Immigration</h3>
+        <p>Petitions and green cards for spouses, parents, children, and other relatives.</p>
+        <span class="practice-link">Learn More <span aria-hidden="true">→</span></span>
+      </button>
+
+      <button class="card practice-card" type="button"
+        data-title="Hardship Waivers"
+        data-details="Representation for I-601, I-601A, and other hardship waivers available under U.S. immigration law.">
+        <div class="icon practice-svg" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10Z"/>
+            <path d="M8.5 12.5h7"/>
+          </svg>
+        </div>
+        <h3>Hardship Waivers</h3>
+        <p>Hardship waivers and other waiver options for eligible immigration cases.</p>
+        <span class="practice-link">Learn More <span aria-hidden="true">→</span></span>
+      </button>
+
+      <button class="card practice-card" type="button"
+        data-title="Naturalization &amp; Citizenship"
+        data-details="Assistance with naturalization applications, citizenship interviews and testing, derivative or acquired citizenship questions, and complex eligibility concerns.">
+        <div class="icon practice-svg" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="4" width="14" height="16" rx="2"/>
+            <path d="M8 8h8"/>
+            <path d="M8 12h5"/>
+            <path d="m14 16 1.4 1.4L18 15"/>
+          </svg>
+        </div>
+        <h3>Naturalization &amp; Citizenship</h3>
+        <p>Naturalization, citizenship interviews, and complex eligibility questions.</p>
+        <span class="practice-link">Learn More <span aria-hidden="true">→</span></span>
+      </button>
+
+      <button class="card practice-card" type="button"
+        data-title="Employment Visas"
+        data-details="Selected employment-based immigration matters for professionals, employees, entrepreneurs, and sponsoring businesses, including temporary and permanent immigration options.">
+        <div class="icon practice-svg" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="7" width="18" height="12" rx="2"/>
+            <path d="M9 7V5h6v2"/>
+            <path d="M3 12h18"/>
+            <path d="M10 12v2h4v-2"/>
+          </svg>
+        </div>
+        <h3>Employment Visas</h3>
+        <p>Immigration options for professionals, employees, entrepreneurs, and businesses.</p>
+        <span class="practice-link">Learn More <span aria-hidden="true">→</span></span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<div class="practice-modal" id="practiceModal" aria-hidden="true">
+  <div class="practice-modal-backdrop" data-close-practice-modal></div>
+  <div class="practice-modal-panel" role="dialog" aria-modal="true" aria-labelledby="practiceModalTitle">
+    <button class="practice-modal-close" type="button" aria-label="Close" data-close-practice-modal>×</button>
+    <div class="eyebrow">Practice Area</div>
+    <h2 id="practiceModalTitle"></h2>
+    <p id="practiceModalText"></p>
+    <a class="btn primary" href="#home" data-close-practice-modal>Schedule a Consultation</a>
+  </div>
+</div>
+
+<section><div class="container"><div class="stats"><div class="stat"><b>15+</b><span>Years of Immigration Experience</span></div><div class="stat"><b>Thousands</b><span>of Cases Reviewed</span></div><div class="stat"><b>Federal Service</b><span>Across USCIS, the Asylum Office, and Immigration Court</span></div></div></div></section>
+<section id="about">
+  <div class="container about-grid founder-section">
+    <div class="about-photo founder-photo">
+      <img src="stock-office.jpg" alt="Access Law Firm office">
+      <div class="founder-photo-label"><strong>15+ Years</strong><span>Immigration Experience</span></div>
+    </div>
+    <div class="founder-copy">
+      <div class="eyebrow">About the Founder</div>
+      <h2>Federal immigration insight. Personal representation.</h2>
+      <p class="founder-intro">The founder of Access Law Firm brings more than 15 years of immigration experience, including service as an Immigration Judge, Supervisory Immigration Services Officer, Asylum Officer, Immigration Officer, and Adjudications Officer handling EB-5 matters.</p>
+      <p>That experience provides a practical understanding of how immigration applications, interviews, and court cases are reviewed and decided. Access Law Firm brings that perspective to clients through clear advice, careful preparation, and strategic representation.</p>
+      <div class="founder-highlights">
+        <div><strong>Immigration Court</strong><span>Former Immigration Judge</span></div>
+        <div><strong>USCIS Leadership</strong><span>Former Supervisory Immigration Services Officer</span></div>
+        <div><strong>Protection Claims</strong><span>Former Asylum Officer</span></div>
+        <div><strong>Agency Adjudications</strong><span>Immigration and EB-5 experience</span></div>
+      </div>
+      <blockquote class="founder-quote">“Every immigration case deserves preparation, strategy, and personal attention.”</blockquote>
+    </div>
+  </div>
+</section>
+<section class="practice" id="faq"><div class="container faq-grid"><div><div class="eyebrow">Questions</div><h2>Frequently asked questions.</h2><div style="margin-top:24px"><details><summary>How does the Virtual Lobby work?</summary><p>Click “Join Virtual Lobby,” verify your phone number, provide basic case information, and wait for a live assistant.</p></details><details><summary>Do I need an appointment?</summary><p>No traditional appointment scheduler is required for initial contact. Clients begin through the Virtual Lobby.</p></details><details><summary>Can I upload documents?</summary><p>Yes. Existing clients can be directed to a secure document upload system after identity verification.</p></details></div></div><aside class="cta"><div class="eyebrow">Ready to Get Started?</div><h3>Join the Virtual Lobby.</h3><p class="hours"><b>Monday–Friday:</b> 9:00 AM–5:00 PM<br><b>Saturday–Sunday:</b> 10:00 AM–3:30 PM</p><button class="btn btn-gold open-lobby">Enter Virtual Lobby →</button></aside></div></section>
+</main>
+<footer><div class="container footer-grid"><div><div class="brand"><div class="logo">A</div><span>ACCESS<small style="color:#c6d5e8">LAW FIRM</small></span></div><p style="margin-top:15px">Former Immigration Judge. Experience, insight, and modern access.</p><p style="margin-top:12px;font-size:.76rem;color:#9fb3cf">Phase One design prototype — photographs are temporary placeholders.</p></div><div><b>Contact</b><p style="margin-top:10px">(713) 489-2089<br>info@accesslawfirm.com<br>Houston, Texas</p></div><div><b>Quick Links</b><p style="margin-top:10px"><a href="#practice">Practice Areas</a><br><a href="#about">About</a><br><a href="#faq">FAQ</a></p></div></div></footer>
+<div class="modal" id="lobbyModal"><div class="modal-card"><div class="modal-top"><div><div class="eyebrow">Virtual Lobby</div><h2 style="font-size:2.1rem">Check in securely.</h2></div><button class="close">✕</button></div><div class="field"><label>Are you a new or existing client?</label><select><option>New client</option><option>Existing client</option></select></div><div class="field"><label>U.S. mobile number</label><input type="tel" placeholder="(713) 555-0123"></div><div class="field"><label>Primary reason for contacting the firm</label><select><option>Removal or detention matter</option><option>Asylum</option><option>Family immigration</option><option>Adjustment of status</option><option>Naturalization & Citizenship</option><option>Appeal</option><option>Other</option></select></div><button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="alert('Prototype only — phone verification would begin here.')">Continue to Phone Verification</button><p class="note">This is an interactive design prototype. It does not transmit or store information.</p></div></div>
+<script>const modal=document.getElementById('lobbyModal');document.querySelectorAll('.open-lobby').forEach(b=>b.onclick=()=>modal.classList.add('open'));document.querySelector('.close').onclick=()=>modal.classList.remove('open');modal.onclick=e=>{if(e.target===modal)modal.classList.remove('open')}
+document.querySelectorAll(".flip-card").forEach(card=>{
+  card.addEventListener("click",()=>{
+    const next=!card.classList.contains("is-flipped");
+    document.querySelectorAll(".flip-card.is-flipped").forEach(other=>{
+      if(other!==card){other.classList.remove("is-flipped");other.setAttribute("aria-pressed","false");}
+    });
+    card.classList.toggle("is-flipped",next);
+    card.setAttribute("aria-pressed",String(next));
+  });
+});
+</script>
+<script>
+(() => {
+  const modal = document.getElementById('practiceModal');
+  const title = document.getElementById('practiceModalTitle');
+  const text = document.getElementById('practiceModalText');
+  if (!modal || !title || !text) return;
+
+  let lastTrigger = null;
+
+  document.querySelectorAll('.practice-card').forEach(card => {
+    card.addEventListener('click', () => {
+      lastTrigger = card;
+      title.textContent = card.dataset.title || '';
+      text.textContent = card.dataset.details || '';
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      modal.querySelector('.practice-modal-close').focus();
+    });
+  });
+
+  const closeModal = () => {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (lastTrigger) lastTrigger.focus();
+  };
+
+  modal.querySelectorAll('[data-close-practice-modal]').forEach(el => {
+    el.addEventListener('click', closeModal);
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+  });
+})();
+</script>
+</body></html>
