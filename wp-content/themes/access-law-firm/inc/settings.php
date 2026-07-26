@@ -199,6 +199,32 @@ function alf_register_settings_page() {
 add_action( 'admin_menu', 'alf_register_settings_page' );
 
 /**
+ * Remind admins to add reCAPTCHA keys while SMS is off.
+ */
+function alf_captcha_keys_admin_notice() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	if ( ! function_exists( 'alf_captcha_setting_enabled' ) || ! alf_captcha_setting_enabled() ) {
+		return;
+	}
+	if ( function_exists( 'alf_captcha_is_configured' ) && alf_captcha_is_configured() ) {
+		return;
+	}
+	if ( function_exists( 'alf_sms_enabled' ) && alf_sms_enabled() ) {
+		return;
+	}
+
+	$url = admin_url( 'options-general.php?page=access-law-firm' );
+	echo '<div class="notice notice-warning"><p>';
+	echo esc_html__( 'Virtual Lobby is using CAPTCHA (SMS is off until Twilio is ready). Add your Google reCAPTCHA v2 keys under', 'access-law-firm' );
+	echo ' <a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings → Access Law Firm', 'access-law-firm' ) . '</a>';
+	echo ' ' . esc_html__( 'or spam protection will not run.', 'access-law-firm' );
+	echo '</p></div>';
+}
+add_action( 'admin_notices', 'alf_captcha_keys_admin_notice' );
+
+/**
  * Register Twilio settings fields.
  */
 function alf_register_settings() {
