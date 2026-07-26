@@ -193,6 +193,7 @@
     var captchaEnabled = !!config.captchaEnabled;
     var verifyMode = config.verifyMode || (smsEnabled ? (captchaEnabled ? 'sms_captcha' : 'sms') : (captchaEnabled ? 'captcha' : 'none'));
     var verifyPhase = 'otp';
+    var recaptchaWidgetId = null;
     var captchaDone = false;
     var state = {
       name: '',
@@ -226,6 +227,27 @@
     }
     applyPhoneStepCopy();
 
+    function ensureRecaptcha(attempt) {
+      var el = document.getElementById('lobbyRecaptcha');
+      if (!el || !captchaEnabled || !config.recaptchaSiteKey) return;
+      attempt = attempt || 0;
+      if (typeof grecaptcha === 'undefined' || typeof grecaptcha.render !== 'function') {
+        if (attempt < 40) {
+          setTimeout(function () { ensureRecaptcha(attempt + 1); }, 100);
+        }
+        return;
+      }
+      if (recaptchaWidgetId !== null) {
+        try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
+        return;
+      }
+      try {
+        recaptchaWidgetId = grecaptcha.render(el, { sitekey: config.recaptchaSiteKey });
+      } catch (e) {
+        /* Already rendered */
+      }
+    }
+
     function setVerifyPhase(phase) {
       verifyPhase = phase;
       var captchaPanel = document.getElementById('lobbyVerifyCaptcha');
@@ -234,41 +256,15 @@
       if (captchaPanel) captchaPanel.hidden = phase !== 'captcha';
       if (smsPanel) smsPanel.hidden = phase !== 'otp';
       if (nextBtn) nextBtn.textContent = phase === 'captcha' ? 'Continue →' : 'Verify';
+      if (phase === 'captcha') {
+        setTimeout(ensureRecaptcha, 50);
+      }
       if (phase === 'otp') {
         var display = document.getElementById('lobbyPhoneDisplay');
         if (display) display.textContent = state.phone || 'your phone';
         var firstOtp = modal.querySelector('[data-otp]');
         if (firstOtp) setTimeout(function () { firstOtp.focus(); }, 50);
       }
-    }
-
-    function runRecaptchaV3() {
-      return new Promise(function (resolve, reject) {
-        if (!config.recaptchaSiteKey) {
-          reject(new Error('CAPTCHA is not configured.'));
-          return;
-        }
-        var tries = 0;
-        var wait = function () {
-          if (typeof grecaptcha === 'undefined' || typeof grecaptcha.execute !== 'function') {
-            tries += 1;
-            if (tries > 50) {
-              reject(new Error('Security check could not load. Please refresh and try again.'));
-              return;
-            }
-            setTimeout(wait, 100);
-            return;
-          }
-          grecaptcha.ready(function () {
-            grecaptcha.execute(config.recaptchaSiteKey, { action: 'lobby_checkin' })
-              .then(resolve)
-              .catch(function () {
-                reject(new Error('Security check failed. Please try again.'));
-              });
-          });
-        };
-        wait();
-      });
     }
 
     function showError(key, show, message) {
@@ -375,6 +371,9 @@
       modal.querySelectorAll('[data-otp]').forEach(function (input) {
         input.value = '';
       });
+      if (recaptchaWidgetId !== null && typeof grecaptcha !== 'undefined') {
+        try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
+      }
       modal.querySelectorAll('.matter-option').forEach(function (btn) {
         btn.classList.remove('selected');
         btn.setAttribute('aria-selected', 'false');
@@ -553,36 +552,39 @@
 
     function verifyCaptcha(triggerBtn) {
       if (busy) return;
+      var token = '';
+      if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
+        token = grecaptcha.getResponse(recaptchaWidgetId) || '';
+      } else if (typeof grecaptcha !== 'undefined') {
+        token = grecaptcha.getResponse() || '';
+      }
+      if (!token) {
+        showError('captcha', true, 'Please complete the CAPTCHA.');
+        return;
+      }
       clearErrors();
-      setBusy(triggerBtn, true, 'Checking…');
-      runRecaptchaV3().then(function (token) {
-        if (!token) {
-          setBusy(triggerBtn, false);
-          showError('captcha', true, 'Security check failed. Please try again.');
-          return;
-        }
-        return ajaxPost('alf_verify_captcha', {
-          captcha_token: token,
-          phone: state.rawPhone,
-          country: state.country
-        }).then(function (res) {
-          setBusy(triggerBtn, false);
-          if (res && res.success) {
-            captchaDone = true;
-            state.verifyToken = (res.data && res.data.verify_token) || '';
-            if (smsEnabled) {
-              sendOtp(triggerBtn);
-            } else {
-              showStep(4);
-            }
-          } else {
-            var msg = res && res.data && res.data.message ? res.data.message : 'Security check failed. Please try again.';
-            showError('captcha', true, msg);
-          }
-        });
-      }).catch(function (err) {
+      setBusy(triggerBtn, true, 'Verifying…');
+      ajaxPost('alf_verify_captcha', {
+        captcha_token: token,
+        phone: state.rawPhone,
+        country: state.country
+      }).then(function (res) {
         setBusy(triggerBtn, false);
-        showError('captcha', true, (err && err.message) ? err.message : 'Security check failed. Please try again.');
+        if (res && res.success) {
+          captchaDone = true;
+          state.verifyToken = (res.data && res.data.verify_token) || '';
+          if (smsEnabled) {
+            sendOtp(triggerBtn);
+          } else {
+            showStep(4);
+          }
+        } else {
+          var msg = res && res.data && res.data.message ? res.data.message : 'CAPTCHA failed. Please try again.';
+          showError('captcha', true, msg);
+          if (recaptchaWidgetId !== null && typeof grecaptcha !== 'undefined') {
+            try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
+          }
+        }
       });
     }
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Google reCAPTCHA v3 helpers for the Virtual Lobby.
+ * Google reCAPTCHA v2 helpers for the Virtual Lobby.
  *
  * @package Access_Law_Firm
  */
@@ -102,7 +102,7 @@ function alf_mark_visitor_verified( $phone ) {
 }
 
 /**
- * Verify a Google reCAPTCHA v3 response token.
+ * Verify a Google reCAPTCHA v2 response token.
  *
  * @param string $token Client response token.
  * @return true|WP_Error
@@ -110,7 +110,7 @@ function alf_mark_visitor_verified( $phone ) {
 function alf_verify_recaptcha_token( $token ) {
 	$token = trim( (string) $token );
 	if ( '' === $token ) {
-		return new WP_Error( 'alf_captcha_empty', __( 'Security check failed. Please try again.', 'access-law-firm' ) );
+		return new WP_Error( 'alf_captcha_empty', __( 'Please complete the CAPTCHA.', 'access-law-firm' ) );
 	}
 
 	$secret = alf_recaptcha_secret_key();
@@ -137,15 +137,6 @@ function alf_verify_recaptcha_token( $token ) {
 	$data = json_decode( wp_remote_retrieve_body( $response ), true );
 	if ( empty( $data['success'] ) ) {
 		return new WP_Error( 'alf_captcha_fail', __( 'CAPTCHA verification failed. Please try again.', 'access-law-firm' ) );
-	}
-
-	// v3 returns a score (0.0–1.0). Reject low-confidence traffic.
-	if ( isset( $data['score'] ) && (float) $data['score'] < 0.5 ) {
-		return new WP_Error( 'alf_captcha_score', __( 'Security check failed. Please try again.', 'access-law-firm' ) );
-	}
-
-	if ( ! empty( $data['action'] ) && 'lobby_checkin' !== $data['action'] ) {
-		return new WP_Error( 'alf_captcha_action', __( 'Security check failed. Please try again.', 'access-law-firm' ) );
 	}
 
 	return true;

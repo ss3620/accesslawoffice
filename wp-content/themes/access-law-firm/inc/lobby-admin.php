@@ -293,9 +293,15 @@ function alf_render_lobby_settings_page() {
 	}
 
 	if ( isset( $_POST['alf_lobby_settings_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['alf_lobby_settings_nonce'] ) ), 'alf_lobby_settings' ) ) {
-		$url = isset( $_POST['teams_meeting_url'] ) ? esc_url_raw( wp_unslash( $_POST['teams_meeting_url'] ) ) : '';
-		alf_update_setting( 'teams_meeting_url', $url );
-		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Lobby settings saved.', 'access-law-firm' ) . '</p></div>';
+		$url   = isset( $_POST['teams_meeting_url'] ) ? wp_unslash( $_POST['teams_meeting_url'] ) : '';
+		$saved = alf_teams_meeting_url( $url );
+		if ( '' !== $saved ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Teams meeting URL saved.', 'access-law-firm' ) . '</p></div>';
+		} elseif ( '' === trim( (string) $url ) ) {
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Teams meeting URL cleared.', 'access-law-firm' ) . '</p></div>';
+		} else {
+			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'That did not look like a valid https Teams link. Paste the full Join URL starting with https://', 'access-law-firm' ) . '</p></div>';
+		}
 	}
 
 	if ( isset( $_POST['alf_create_receptionist_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['alf_create_receptionist_nonce'] ) ), 'alf_create_receptionist' ) ) {
@@ -314,20 +320,20 @@ function alf_render_lobby_settings_page() {
 		echo '</div>';
 	}
 
-	$teams_url        = alf_get_setting( 'teams_meeting_url', '' );
+	$teams_url        = alf_teams_meeting_url();
 	$existing_user    = get_user_by( 'login', 'receptionist' );
 	$has_receptionist = $existing_user && in_array( 'alf_receptionist', (array) $existing_user->roles, true );
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Virtual Lobby Settings', 'access-law-firm' ); ?></h1>
-		<form method="post">
+		<form method="post" action="">
 			<?php wp_nonce_field( 'alf_lobby_settings', 'alf_lobby_settings_nonce' ); ?>
 			<table class="form-table" role="presentation">
 				<tr>
 					<th scope="row"><label for="teams_meeting_url"><?php esc_html_e( 'Microsoft Teams meeting URL', 'access-law-firm' ); ?></label></th>
 					<td>
-						<input type="url" class="large-text" id="teams_meeting_url" name="teams_meeting_url" value="<?php echo esc_attr( $teams_url ); ?>" placeholder="https://teams.microsoft.com/l/meetup-join/...">
-						<p class="description"><?php esc_html_e( 'Clients open this link when the receptionist marks them Ready and they click “Join Reception”. Create a meeting in Teams and paste the join URL here.', 'access-law-firm' ); ?></p>
+						<input type="text" class="large-text" id="teams_meeting_url" name="teams_meeting_url" value="<?php echo esc_attr( $teams_url ); ?>" placeholder="https://teams.microsoft.com/l/meetup-join/..." autocomplete="off" spellcheck="false">
+						<p class="description"><?php esc_html_e( 'In Teams: Meeting → Share invite → Copy meeting link. Paste the full https:// link here, then click Save Settings.', 'access-law-firm' ); ?></p>
 					</td>
 				</tr>
 			</table>
@@ -374,7 +380,7 @@ function alf_render_lobby_queue_page() {
 	}
 
 	$is_open   = alf_is_lobby_open();
-	$teams_url = alf_get_setting( 'teams_meeting_url', '' );
+	$teams_url = alf_teams_meeting_url();
 
 	if ( isset( $_GET['alf_lobby_toggled'] ) ) {
 		$toggled_open = '1' === (string) wp_unslash( $_GET['alf_lobby_toggled'] );
@@ -532,7 +538,10 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
   function loadQueue() {
     post('alf_queue_list', {}).then(function (res) {
       if (res && res.success) renderQueue(res.data.items || []);
-      else bodyEl.innerHTML = '<tr><td colspan="7">Could not load queue.</td></tr>';
+      else {
+        var msg = (res && res.data && res.data.message) ? res.data.message : 'Could not load queue.';
+        bodyEl.innerHTML = '<tr><td colspan="7">' + escapeHtml(msg) + '</td></tr>';
+      }
     }).catch(function () {
       bodyEl.innerHTML = '<tr><td colspan="7">Network error loading queue.</td></tr>';
     });

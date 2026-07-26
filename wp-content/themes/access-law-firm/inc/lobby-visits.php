@@ -25,6 +25,7 @@ function alf_register_lobby_visit_cpt() {
 			'show_in_menu'        => false,
 			'supports'            => array( 'title' ),
 			'capability_type'     => 'post',
+			'map_meta_cap'        => true,
 			'exclude_from_search' => true,
 		)
 	);
@@ -155,11 +156,12 @@ function alf_ajax_check_in() {
 			'post_type'   => 'alf_lobby_visit',
 			'post_status' => 'publish',
 			'post_title'  => $name,
+			'post_author' => 0,
 		),
 		true
 	);
 
-	if ( is_wp_error( $post_id ) ) {
+	if ( is_wp_error( $post_id ) || ! $post_id ) {
 		wp_send_json_error( array( 'message' => __( 'Could not complete check-in. Please try again.', 'access-law-firm' ) ), 500 );
 	}
 
@@ -229,7 +231,7 @@ function alf_ajax_visit_status() {
 	);
 
 	if ( in_array( $status, array( 'ready', 'in_meeting' ), true ) ) {
-		$payload['teams_url'] = esc_url_raw( alf_get_setting( 'teams_meeting_url', '' ) );
+		$payload['teams_url'] = esc_url_raw( alf_teams_meeting_url() );
 	}
 
 	wp_send_json_success( $payload );
@@ -278,9 +280,10 @@ function alf_ajax_queue_list() {
 			'posts_per_page' => 100,
 			'orderby'        => 'date',
 			'order'          => 'ASC',
+			// Active visits from the last 7 days (avoid “today-only” timezone misses).
 			'date_query'     => array(
 				array(
-					'after' => 'today',
+					'after'     => '7 days ago',
 					'inclusive' => true,
 				),
 			),
@@ -355,7 +358,7 @@ function alf_ajax_queue_update() {
 	}
 
 	if ( 'ready' === $action ) {
-		if ( ! alf_get_setting( 'teams_meeting_url', '' ) ) {
+		if ( ! alf_teams_meeting_url() ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'Set a Teams meeting URL under Virtual Lobby → Settings before marking Ready.', 'access-law-firm' ),

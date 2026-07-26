@@ -194,11 +194,11 @@
 
 			<div id="lobbyVerifyCaptcha" class="lobby-verify-panel" hidden>
 				<h3 class="lobby-step-title">Quick security check</h3>
-				<p class="lobby-step-desc">Click Continue and Google will quietly confirm you are human. No checkbox needed.</p>
-				<div class="lobby-captcha-wrap lobby-captcha-v3">
-					<p class="phone-info" style="margin:0;width:100%;text-align:center;">Protected by Google reCAPTCHA</p>
+				<p class="lobby-step-desc">Please confirm you are human to continue to the Virtual Lobby.</p>
+				<div class="lobby-captcha-wrap">
+					<div id="lobbyRecaptcha"></div>
 				</div>
-				<div class="lobby-error" data-error-for="captcha">Security check failed. Please try again.</div>
+				<div class="lobby-error" data-error-for="captcha">Please complete the CAPTCHA.</div>
 			</div>
 
 			<div id="lobbyVerifySms" class="lobby-verify-panel" hidden>

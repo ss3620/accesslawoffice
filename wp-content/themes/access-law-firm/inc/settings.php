@@ -53,6 +53,62 @@ function alf_update_setting( $key, $value ) {
 }
 
 /**
+ * Sanitize a Microsoft Teams meeting join URL.
+ *
+ * Teams links often include characters that strict HTML5 url inputs reject.
+ *
+ * @param string $url Raw URL.
+ * @return string
+ */
+function alf_sanitize_teams_url( $url ) {
+	$url = trim( (string) $url );
+	$url = preg_replace( '/\s+/', '', $url );
+	if ( '' === $url ) {
+		return '';
+	}
+	if ( ! preg_match( '#^https?://#i', $url ) ) {
+		$url = 'https://' . ltrim( $url, '/' );
+	}
+	// Prefer WordPress sanitizer, but keep a safe fallback if it blanks a valid https URL.
+	$clean = esc_url_raw( $url, array( 'http', 'https' ) );
+	if ( $clean ) {
+		return $clean;
+	}
+	if ( preg_match( '#^https://[^\s<>"\']+#i', $url, $m ) ) {
+		return $m[0];
+	}
+	return '';
+}
+
+/**
+ * Get / set Teams meeting URL (dedicated option for reliable saves).
+ *
+ * @param string|null $new_url Optional new value to save.
+ * @return string
+ */
+function alf_teams_meeting_url( $new_url = null ) {
+	if ( null !== $new_url ) {
+		$clean = alf_sanitize_teams_url( $new_url );
+		update_option( 'alf_teams_meeting_url', $clean, true );
+		// Keep legacy key in sync for older reads.
+		alf_update_setting( 'teams_meeting_url', $clean );
+		wp_cache_delete( 'alf_teams_meeting_url', 'options' );
+		return $clean;
+	}
+
+	$stored = get_option( 'alf_teams_meeting_url', '__missing__' );
+	if ( '__missing__' !== $stored ) {
+		return (string) $stored;
+	}
+
+	$legacy = (string) alf_get_setting( 'teams_meeting_url', '' );
+	if ( '' !== $legacy ) {
+		update_option( 'alf_teams_meeting_url', $legacy, true );
+	}
+	return $legacy;
+}
+
+/**
  * Whether the Virtual Lobby is currently open.
  *
  * Uses dedicated option `alf_lobby_open` (1/0) so saves are reliable.
@@ -217,7 +273,7 @@ function alf_captcha_keys_admin_notice() {
 
 	$url = admin_url( 'options-general.php?page=access-law-firm' );
 	echo '<div class="notice notice-warning"><p>';
-	echo esc_html__( 'Virtual Lobby is using CAPTCHA (SMS is off until Twilio is ready). Add your Google reCAPTCHA v3 keys under', 'access-law-firm' );
+	echo esc_html__( 'Virtual Lobby is using CAPTCHA (SMS is off until Twilio is ready). Add your Google reCAPTCHA v2 keys under', 'access-law-firm' );
 	echo ' <a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings → Access Law Firm', 'access-law-firm' ) . '</a>';
 	echo ' ' . esc_html__( 'or spam protection will not run.', 'access-law-firm' );
 	echo '</p></div>';
@@ -266,7 +322,7 @@ function alf_register_settings() {
 		'alf_verify_section',
 		array(
 			'key'         => 'captcha_enabled',
-			'label'       => __( 'Require Google reCAPTCHA v3 before check-in', 'access-law-firm' ),
+			'label'       => __( 'Require Google reCAPTCHA v2 (“I’m not a robot”) before check-in', 'access-law-firm' ),
 			'default'     => 1,
 		)
 	);
@@ -342,7 +398,7 @@ function alf_verify_section_intro() {
 		esc_html_e( 'Phone collected only — enable CAPTCHA keys or SMS', 'access-law-firm' );
 	}
 	echo '</p>';
-	echo '<p class="description">' . esc_html__( 'Use Google reCAPTCHA v3 keys (not v2). Add domains: accesslawoffice.com and www.accesslawoffice.com. “Invalid key type” means the keys are v2 — create a v3 key pair instead, or ask us to switch the theme back to v2.', 'access-law-firm' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Create keys at Google reCAPTCHA → choose v2 “I’m not a robot” Checkbox (not v3). Domains: accesslawoffice.com and www.accesslawoffice.com.', 'access-law-firm' ) . '</p>';
 }
 
 /**
