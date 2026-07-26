@@ -121,14 +121,32 @@ function alf_ajax_check_in() {
 	$country = isset( $_POST['country'] ) ? wp_unslash( $_POST['country'] ) : '';
 	$phone   = alf_normalize_phone( isset( $_POST['phone'] ) ? wp_unslash( $_POST['phone'] ) : '', $country );
 
-	if ( strlen( $name ) < 2 || '' === $phone || '' === $matter ) {
-		wp_send_json_error( array( 'message' => __( 'Please complete name, phone, and matter type.', 'access-law-firm' ) ), 400 );
+	$sms_on      = function_exists( 'alf_sms_enabled' ) && alf_sms_enabled();
+	$verify_mode = function_exists( 'alf_lobby_verify_mode' ) ? alf_lobby_verify_mode() : 'none';
+
+	if ( strlen( $name ) < 2 || '' === $matter ) {
+		wp_send_json_error( array( 'message' => __( 'Please complete your name and matter type.', 'access-law-firm' ) ), 400 );
 	}
 
-	// Soft gate: require recent CAPTCHA / OTP / skip verification for this phone.
-	$verified_key = 'alf_phone_ok_' . md5( $phone . '|' . wp_salt() );
-	if ( ! get_transient( $verified_key ) ) {
-		wp_send_json_error( array( 'message' => __( 'Please complete verification before checking in.', 'access-law-firm' ) ), 403 );
+	// Phone is only required while SMS verification is on (phone step is skipped otherwise).
+	if ( $sms_on && '' === $phone ) {
+		wp_send_json_error( array( 'message' => __( 'Please enter a valid phone number.', 'access-law-firm' ) ), 400 );
+	}
+
+	$verified_key = '';
+	if ( $sms_on ) {
+		// Gate: recent successful OTP for this phone.
+		$verified_key = 'alf_phone_ok_' . md5( $phone . '|' . wp_salt() );
+		if ( ! get_transient( $verified_key ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please complete verification before checking in.', 'access-law-firm' ) ), 403 );
+		}
+	} elseif ( 'captcha' === $verify_mode ) {
+		// Gate: one-time CAPTCHA pass issued by alf_verify_captcha.
+		$pass = isset( $_POST['verify_token'] ) ? sanitize_text_field( wp_unslash( $_POST['verify_token'] ) ) : '';
+		$verified_key = $pass ? 'alf_verify_tok_' . $pass : '';
+		if ( '' === $verified_key || ! get_transient( $verified_key ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please complete the CAPTCHA before checking in.', 'access-law-firm' ) ), 403 );
+		}
 	}
 
 	$now = current_time( 'mysql' );
@@ -155,7 +173,9 @@ function alf_ajax_check_in() {
 	update_post_meta( $post_id, 'position', $position );
 
 	// One-time use of verification flag for this check-in.
-	delete_transient( $verified_key );
+	if ( '' !== $verified_key ) {
+		delete_transient( $verified_key );
+	}
 
 	$token = wp_hash( $post_id . '|' . $phone . '|' . wp_salt( 'nonce' ) );
 	set_transient( 'alf_visit_tok_' . $post_id, $token, 4 * HOUR_IN_SECONDS );
@@ -293,7 +313,7 @@ function alf_ajax_queue_list() {
 		$items[] = array(
 			'id'           => (int) $post->ID,
 			'name'         => get_post_meta( $post->ID, 'visitor_name', true ) ?: $post->post_title,
-			'phone'        => get_post_meta( $post->ID, 'phone_e164', true ),
+			'phone'        => get_post_meta( $post->ID, 'phone_e164', true ) ?: '—',
 			'matter'       => get_post_meta( $post->ID, 'matter_type', true ),
 			'status'       => $status,
 			'status_label' => alf_queue_status_label( $status ),

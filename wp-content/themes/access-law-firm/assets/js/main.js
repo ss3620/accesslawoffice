@@ -202,6 +202,7 @@
       country: '+1',
       otp: '',
       matter: '',
+      verifyToken: '',
       visitId: 0,
       visitToken: '',
       teamsUrl: ''
@@ -353,7 +354,7 @@
       modal.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('lobby-open');
       // Reset for next visit
-      state = { name: '', phone: '', rawPhone: '', country: '+1', otp: '', matter: '', visitId: 0, visitToken: '', teamsUrl: '' };
+      state = { name: '', phone: '', rawPhone: '', country: '+1', otp: '', matter: '', verifyToken: '', visitId: 0, visitToken: '', teamsUrl: '' };
       selectedMatter = '';
       captchaDone = false;
       verifyPhase = captchaEnabled ? 'captcha' : 'otp';
@@ -398,6 +399,12 @@
         var countrySelect = document.getElementById('lobbyCountry');
         var country = countrySelect ? countrySelect.value : '+1';
         var phone = digitsOnly(phoneInput ? phoneInput.value : '');
+        // Accept numbers pasted with the country code (e.g. +917355933788 or 17135550123).
+        if (country === '+91' && phone.length === 12 && phone.indexOf('91') === 0) {
+          phone = phone.slice(2);
+        } else if (country === '+1' && phone.length === 11 && phone.indexOf('1') === 0) {
+          phone = phone.slice(1);
+        }
         if (phone.length !== 10) {
           showError('phone', true, 'Please enter a valid 10-digit mobile number.');
           if (phoneInput) phoneInput.focus();
@@ -500,7 +507,8 @@
         name: state.name,
         phone: state.rawPhone,
         country: state.country,
-        matter: state.matter
+        matter: state.matter,
+        verify_token: state.verifyToken
       }).then(function (res) {
         setBusy(triggerBtn, false);
         if (res && res.success) {
@@ -558,6 +566,7 @@
         setBusy(triggerBtn, false);
         if (res && res.success) {
           captchaDone = true;
+          state.verifyToken = (res.data && res.data.verify_token) || '';
           if (smsEnabled) {
             sendOtp(triggerBtn);
           } else {
@@ -617,7 +626,24 @@
     function goNext(triggerBtn) {
       if (busy) return;
 
-      // Step 2: phone → CAPTCHA / SMS / skip.
+      // Step 1: name → phone (SMS on) / CAPTCHA / matter (phone step skipped while SMS is off).
+      if (currentStep === 1) {
+        if (!validateCurrent()) return;
+        if (smsEnabled) {
+          showStep(2);
+          return;
+        }
+        if (captchaEnabled) {
+          verifyPhase = 'captcha';
+          captchaDone = false;
+          showStep(3);
+          return;
+        }
+        showStep(4);
+        return;
+      }
+
+      // Step 2: phone → CAPTCHA / SMS.
       if (currentStep === 2) {
         if (!validateCurrent()) return;
         if (captchaEnabled) {
@@ -661,6 +687,11 @@
       if (currentStep === 3 && verifyPhase === 'otp' && captchaEnabled && captchaDone) {
         verifyPhase = 'captcha';
         showStep(3);
+        return;
+      }
+      // Phone step is skipped while SMS is off — jump over it going back too.
+      if (!smsEnabled && (currentStep === 3 || currentStep === 4)) {
+        showStep(1);
         return;
       }
       if (currentStep > 0) {

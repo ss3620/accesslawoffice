@@ -152,7 +152,16 @@ function alf_ajax_verify_captcha() {
 		alf_mark_visitor_verified( $phone );
 	}
 
-	wp_send_json_success( array( 'message' => __( 'CAPTCHA verified.', 'access-law-firm' ) ) );
+	// One-time pass for check-in without a phone number (phone step skipped).
+	$pass = wp_generate_password( 24, false, false );
+	set_transient( 'alf_verify_tok_' . $pass, 1, 15 * MINUTE_IN_SECONDS );
+
+	wp_send_json_success(
+		array(
+			'message'      => __( 'CAPTCHA verified.', 'access-law-firm' ),
+			'verify_token' => $pass,
+		)
+	);
 }
 add_action( 'wp_ajax_alf_verify_captcha', 'alf_ajax_verify_captcha' );
 add_action( 'wp_ajax_nopriv_alf_verify_captcha', 'alf_ajax_verify_captcha' );
