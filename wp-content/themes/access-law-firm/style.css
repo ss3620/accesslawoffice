@@ -1427,6 +1427,17 @@ select {
   line-height: 1.4;
 }
 
+.lobby-captcha-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 6px;
+  min-height: 78px;
+}
+
+.lobby-verify-panel[hidden] {
+  display: none !important;
+}
+
 .otp-row {
   display: grid;
   grid-template-columns: repeat(6, 1fr);

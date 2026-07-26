@@ -3,7 +3,7 @@
  * Admin settings for Access Law Firm theme.
  *
  * - Virtual Lobby Open/Closed lives on the WordPress Dashboard (widget).
- * - Twilio SMS credentials live under Settings > Access Law Firm.
+ * - Verification toggles (SMS / CAPTCHA) and Twilio credentials under Settings > Access Law Firm.
  *
  * @package Access_Law_Firm
  */
@@ -213,8 +213,59 @@ function alf_register_settings() {
 	);
 
 	add_settings_section(
+		'alf_verify_section',
+		__( 'Lobby verification', 'access-law-firm' ),
+		'alf_verify_section_intro',
+		'access-law-firm'
+	);
+
+	add_settings_field(
+		'sms_enabled',
+		__( 'Enable SMS (Twilio)', 'access-law-firm' ),
+		'alf_field_checkbox',
+		'access-law-firm',
+		'alf_verify_section',
+		array(
+			'key'         => 'sms_enabled',
+			'label'       => __( 'Require SMS code verification (turn on when Twilio is live)', 'access-law-firm' ),
+			'default'     => 0,
+		)
+	);
+
+	add_settings_field(
+		'captcha_enabled',
+		__( 'Enable CAPTCHA', 'access-law-firm' ),
+		'alf_field_checkbox',
+		'access-law-firm',
+		'alf_verify_section',
+		array(
+			'key'         => 'captcha_enabled',
+			'label'       => __( 'Require Google reCAPTCHA before check-in', 'access-law-firm' ),
+			'default'     => 1,
+		)
+	);
+
+	add_settings_field(
+		'recaptcha_site_key',
+		__( 'reCAPTCHA Site Key', 'access-law-firm' ),
+		'alf_field_text',
+		'access-law-firm',
+		'alf_verify_section',
+		array( 'key' => 'recaptcha_site_key', 'placeholder' => '6Lc...' )
+	);
+
+	add_settings_field(
+		'recaptcha_secret_key',
+		__( 'reCAPTCHA Secret Key', 'access-law-firm' ),
+		'alf_field_password',
+		'access-law-firm',
+		'alf_verify_section',
+		array( 'key' => 'recaptcha_secret_key' )
+	);
+
+	add_settings_section(
 		'alf_twilio_section',
-		__( 'Twilio SMS Verification', 'access-law-firm' ),
+		__( 'Twilio SMS credentials', 'access-law-firm' ),
 		'alf_twilio_section_intro',
 		'access-law-firm'
 	);
@@ -249,16 +300,34 @@ function alf_register_settings() {
 add_action( 'admin_init', 'alf_register_settings' );
 
 /**
- * Intro copy for the Twilio section.
+ * Intro for verification toggles.
  */
-function alf_twilio_section_intro() {
-	echo '<p>' . esc_html__( 'Enter your Twilio credentials to send the 6-digit verification code by SMS. Find these in your Twilio Console.', 'access-law-firm' ) . '</p>';
-	echo '<p class="description">' . esc_html__( 'Receptionists manage the live queue under Virtual Lobby in the admin menu. Teams meeting URL is under Virtual Lobby → Settings.', 'access-law-firm' ) . '</p>';
+function alf_verify_section_intro() {
+	$mode = function_exists( 'alf_lobby_verify_mode' ) ? alf_lobby_verify_mode() : 'none';
+	echo '<p>' . esc_html__( 'While Twilio is pending, keep SMS off and use CAPTCHA. When Twilio is live, turn SMS on — you can keep CAPTCHA on as well.', 'access-law-firm' ) . '</p>';
+	echo '<p class="description"><strong>' . esc_html__( 'Current active mode:', 'access-law-firm' ) . '</strong> ';
+	if ( 'sms_captcha' === $mode ) {
+		esc_html_e( 'SMS + CAPTCHA', 'access-law-firm' );
+	} elseif ( 'sms' === $mode ) {
+		esc_html_e( 'SMS verification', 'access-law-firm' );
+	} elseif ( 'captcha' === $mode ) {
+		esc_html_e( 'CAPTCHA only (SMS off or not configured)', 'access-law-firm' );
+	} else {
+		esc_html_e( 'Phone collected only — enable CAPTCHA keys or SMS', 'access-law-firm' );
+	}
+	echo '</p>';
+	echo '<p class="description">' . esc_html__( 'Create free keys at Google reCAPTCHA (v2 “I’m not a robot” Checkbox) for your site domain.', 'access-law-firm' ) . '</p>';
 }
 
 /**
- * Sanitize Twilio settings before save.
- * Does not change lobby_open — that is controlled from the Dashboard widget.
+ * Intro copy for the Twilio section.
+ */
+function alf_twilio_section_intro() {
+	echo '<p>' . esc_html__( 'Save Twilio credentials now even if SMS is disabled. They will be used when you enable SMS above.', 'access-law-firm' ) . '</p>';
+}
+
+/**
+ * Sanitize settings before save.
  *
  * @param array $input Raw input.
  * @return array
@@ -270,6 +339,19 @@ function alf_sanitize_settings( $input ) {
 	}
 
 	$output = $existing;
+
+	$output['sms_enabled']     = ! empty( $input['sms_enabled'] ) ? 1 : 0;
+	$output['captcha_enabled'] = ! empty( $input['captcha_enabled'] ) ? 1 : 0;
+
+	if ( isset( $input['recaptcha_site_key'] ) ) {
+		$output['recaptcha_site_key'] = sanitize_text_field( $input['recaptcha_site_key'] );
+	}
+	if ( isset( $input['recaptcha_secret_key'] ) ) {
+		$secret = trim( $input['recaptcha_secret_key'] );
+		if ( '' !== $secret ) {
+			$output['recaptcha_secret_key'] = sanitize_text_field( $secret );
+		}
+	}
 
 	if ( isset( $input['twilio_sid'] ) ) {
 		$output['twilio_sid'] = sanitize_text_field( $input['twilio_sid'] );
@@ -285,6 +367,25 @@ function alf_sanitize_settings( $input ) {
 	}
 
 	return $output;
+}
+
+/**
+ * Render: checkbox field.
+ *
+ * @param array $args Field args.
+ */
+function alf_field_checkbox( $args ) {
+	$key     = $args['key'];
+	$label   = isset( $args['label'] ) ? $args['label'] : '';
+	$default = isset( $args['default'] ) ? (int) $args['default'] : 0;
+	$value   = (int) alf_get_setting( $key, $default );
+	printf(
+		'<label><input type="checkbox" name="%1$s[%2$s]" value="1" %3$s> %4$s</label>',
+		esc_attr( ALF_OPTION_KEY ),
+		esc_attr( $key ),
+		checked( 1, $value, false ),
+		esc_html( $label )
+	);
 }
 
 /**
@@ -333,7 +434,7 @@ function alf_render_settings_page() {
 	}
 	?>
 	<div class="wrap">
-		<h1><?php esc_html_e( 'Access Law Firm — Twilio SMS', 'access-law-firm' ); ?></h1>
+		<h1><?php esc_html_e( 'Access Law Firm — Verification & Twilio', 'access-law-firm' ); ?></h1>
 		<form action="options.php" method="post">
 			<?php
 			settings_fields( 'alf_settings_group' );

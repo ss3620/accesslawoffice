@@ -125,11 +125,10 @@ function alf_ajax_check_in() {
 		wp_send_json_error( array( 'message' => __( 'Please complete name, phone, and matter type.', 'access-law-firm' ) ), 400 );
 	}
 
-	// Soft gate: require a recent successful OTP for this phone (transient cleared on verify,
-	// so we set a short-lived "verified" flag in verify handler).
+	// Soft gate: require recent CAPTCHA / OTP / skip verification for this phone.
 	$verified_key = 'alf_phone_ok_' . md5( $phone . '|' . wp_salt() );
 	if ( ! get_transient( $verified_key ) ) {
-		wp_send_json_error( array( 'message' => __( 'Please verify your phone number before checking in.', 'access-law-firm' ) ), 403 );
+		wp_send_json_error( array( 'message' => __( 'Please complete verification before checking in.', 'access-law-firm' ) ), 403 );
 	}
 
 	$now = current_time( 'mysql' );

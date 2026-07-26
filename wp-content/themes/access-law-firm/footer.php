@@ -158,7 +158,7 @@
 				</svg>
 			</div>
 			<h3 class="lobby-step-title">What is your mobile phone number?</h3>
-			<p class="lobby-step-desc">We will send a 6-digit verification code.</p>
+			<p class="lobby-step-desc" id="lobbyPhoneDesc">We use this number to reach you about your visit.</p>
 			<div class="field">
 				<label for="lobbyPhone">Mobile phone number</label>
 				<div class="phone-row">
@@ -169,15 +169,15 @@
 					<input type="tel" id="lobbyPhone" name="phone" placeholder="(713) 555-0123" autocomplete="tel">
 				</div>
 				<div class="lobby-error" data-error-for="phone">Please enter a valid 10-digit mobile number.</div>
-				<div class="phone-info">A 6-digit code will be sent by SMS for verification. Standard message rates may apply.</div>
+				<div class="phone-info" id="lobbyPhoneInfo">Your number is kept private and used only for this visit.</div>
 			</div>
 			<div class="lobby-actions">
-				<button class="btn btn-primary" type="button" data-lobby-next>Send Code →</button>
+				<button class="btn btn-primary" type="button" data-lobby-next id="lobbyPhoneNext">Continue →</button>
 				<button class="lobby-back" type="button" data-lobby-back>← Back</button>
 			</div>
 		</div>
 
-		<!-- Step 3: OTP Verify (still 2 of 4 visually) -->
+		<!-- Step 3: CAPTCHA and/or SMS OTP -->
 		<div class="lobby-step" data-step="3">
 			<div class="lobby-progress" data-progress="2">
 				<div class="lobby-progress-label">Step 2 of 4</div>
@@ -191,20 +191,33 @@
 					<path d="m9 12 2 2 4-4"/>
 				</svg>
 			</div>
-			<h3 class="lobby-step-title">Enter the 6-digit code</h3>
-			<p class="lobby-step-desc">We sent a code to <strong id="lobbyPhoneDisplay">your phone</strong>.</p>
-			<div class="otp-row" id="lobbyOtpRow">
-				<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 1" data-otp>
-				<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2" data-otp>
-				<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3" data-otp>
-				<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4" data-otp>
-				<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5" data-otp>
-				<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6" data-otp>
+
+			<div id="lobbyVerifyCaptcha" class="lobby-verify-panel" hidden>
+				<h3 class="lobby-step-title">Quick security check</h3>
+				<p class="lobby-step-desc">Please confirm you are human to continue to the Virtual Lobby.</p>
+				<div class="lobby-captcha-wrap">
+					<div id="lobbyRecaptcha" class="g-recaptcha"></div>
+				</div>
+				<div class="lobby-error" data-error-for="captcha">Please complete the CAPTCHA.</div>
 			</div>
-			<div class="lobby-error" data-error-for="otp">Please enter the complete 6-digit code.</div>
-			<button class="resend-link" type="button" data-lobby-resend>Resend Code</button>
+
+			<div id="lobbyVerifySms" class="lobby-verify-panel" hidden>
+				<h3 class="lobby-step-title">Enter the 6-digit code</h3>
+				<p class="lobby-step-desc">We sent a code to <strong id="lobbyPhoneDisplay">your phone</strong>.</p>
+				<div class="otp-row" id="lobbyOtpRow">
+					<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 1" data-otp>
+					<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2" data-otp>
+					<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3" data-otp>
+					<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4" data-otp>
+					<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5" data-otp>
+					<input type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6" data-otp>
+				</div>
+				<div class="lobby-error" data-error-for="otp">Please enter the complete 6-digit code.</div>
+				<button class="resend-link" type="button" data-lobby-resend>Resend Code</button>
+			</div>
+
 			<div class="lobby-actions">
-				<button class="btn btn-primary" type="button" data-lobby-next>Verify</button>
+				<button class="btn btn-primary" type="button" data-lobby-next id="lobbyVerifyNext">Verify</button>
 				<button class="lobby-back" type="button" data-lobby-back>← Back</button>
 			</div>
 		</div>

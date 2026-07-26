@@ -100,6 +100,10 @@ function alf_ajax_send_otp() {
 		wp_send_json_error( array( 'message' => __( 'The Virtual Lobby is currently closed. Please try again during lobby hours.', 'access-law-firm' ) ), 403 );
 	}
 
+	if ( function_exists( 'alf_sms_enabled' ) && ! alf_sms_enabled() ) {
+		wp_send_json_error( array( 'message' => __( 'SMS verification is currently disabled. Please use CAPTCHA or contact the office.', 'access-law-firm' ) ), 403 );
+	}
+
 	$country = isset( $_POST['country'] ) ? wp_unslash( $_POST['country'] ) : '';
 	$phone   = alf_normalize_phone( isset( $_POST['phone'] ) ? wp_unslash( $_POST['phone'] ) : '', $country );
 	if ( '' === $phone ) {
@@ -173,7 +177,11 @@ function alf_ajax_verify_otp() {
 	delete_transient( alf_otp_throttle_key( $phone ) );
 
 	// Allow check-in for a short window after successful verify.
-	set_transient( 'alf_phone_ok_' . md5( $phone . '|' . wp_salt() ), 1, 15 * MINUTE_IN_SECONDS );
+	if ( function_exists( 'alf_mark_visitor_verified' ) ) {
+		alf_mark_visitor_verified( $phone );
+	} else {
+		set_transient( 'alf_phone_ok_' . md5( $phone . '|' . wp_salt() ), 1, 15 * MINUTE_IN_SECONDS );
+	}
 
 	wp_send_json_success( array( 'message' => __( 'Phone number verified.', 'access-law-firm' ) ) );
 }

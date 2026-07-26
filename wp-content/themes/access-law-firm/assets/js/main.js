@@ -189,6 +189,12 @@
     var selectedMatter = '';
     var busy = false;
     var config = window.alfLobby || {};
+    var smsEnabled = !!config.smsEnabled;
+    var captchaEnabled = !!config.captchaEnabled;
+    var verifyMode = config.verifyMode || (smsEnabled ? (captchaEnabled ? 'sms_captcha' : 'sms') : (captchaEnabled ? 'captcha' : 'none'));
+    var verifyPhase = 'otp';
+    var recaptchaWidgetId = null;
+    var captchaDone = false;
     var state = {
       name: '',
       phone: '',
@@ -201,6 +207,58 @@
       teamsUrl: ''
     };
     var pollTimer = null;
+
+    function applyPhoneStepCopy() {
+      var desc = document.getElementById('lobbyPhoneDesc');
+      var info = document.getElementById('lobbyPhoneInfo');
+      var nextBtn = document.getElementById('lobbyPhoneNext');
+      if (smsEnabled) {
+        if (desc) desc.textContent = 'We will send a 6-digit verification code.';
+        if (info) info.textContent = 'A 6-digit code will be sent by SMS for verification. Standard message rates may apply.';
+        if (nextBtn) nextBtn.textContent = captchaEnabled ? 'Continue →' : 'Send Code →';
+      } else {
+        if (desc) desc.textContent = 'We use this number to reach you about your visit.';
+        if (info) info.textContent = captchaEnabled
+          ? 'Next you will complete a quick security check. Your number is kept private.'
+          : 'Your number is kept private and used only for this visit.';
+        if (nextBtn) nextBtn.textContent = 'Continue →';
+      }
+    }
+    applyPhoneStepCopy();
+
+    function ensureRecaptcha() {
+      var el = document.getElementById('lobbyRecaptcha');
+      if (!el || !captchaEnabled || !config.recaptchaSiteKey) return;
+      if (typeof grecaptcha === 'undefined' || typeof grecaptcha.render !== 'function') return;
+      if (recaptchaWidgetId !== null) {
+        try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
+        return;
+      }
+      try {
+        recaptchaWidgetId = grecaptcha.render(el, { sitekey: config.recaptchaSiteKey });
+      } catch (e) {
+        /* Already rendered */
+      }
+    }
+
+    function setVerifyPhase(phase) {
+      verifyPhase = phase;
+      var captchaPanel = document.getElementById('lobbyVerifyCaptcha');
+      var smsPanel = document.getElementById('lobbyVerifySms');
+      var nextBtn = document.getElementById('lobbyVerifyNext');
+      if (captchaPanel) captchaPanel.hidden = phase !== 'captcha';
+      if (smsPanel) smsPanel.hidden = phase !== 'otp';
+      if (nextBtn) nextBtn.textContent = phase === 'captcha' ? 'Continue →' : 'Verify';
+      if (phase === 'captcha') {
+        setTimeout(ensureRecaptcha, 50);
+      }
+      if (phase === 'otp') {
+        var display = document.getElementById('lobbyPhoneDisplay');
+        if (display) display.textContent = state.phone || 'your phone';
+        var firstOtp = modal.querySelector('[data-otp]');
+        if (firstOtp) setTimeout(function () { firstOtp.focus(); }, 50);
+      }
+    }
 
     function showError(key, show, message) {
       var el = modal.querySelector('[data-error-for="' + key + '"]');
@@ -261,14 +319,7 @@
       });
 
       if (n === 3) {
-        var display = document.getElementById('lobbyPhoneDisplay');
-        if (display) {
-          display.textContent = state.phone || 'your phone';
-        }
-        var firstOtp = modal.querySelector('[data-otp]');
-        if (firstOtp) {
-          setTimeout(function () { firstOtp.focus(); }, 50);
-        }
+        setVerifyPhase(verifyPhase);
       }
 
       if (n === 1) {
@@ -304,6 +355,8 @@
       // Reset for next visit
       state = { name: '', phone: '', rawPhone: '', country: '+1', otp: '', matter: '', visitId: 0, visitToken: '', teamsUrl: '' };
       selectedMatter = '';
+      captchaDone = false;
+      verifyPhase = captchaEnabled ? 'captcha' : 'otp';
       var nameInput = document.getElementById('lobbyFullName');
       var phoneInput = document.getElementById('lobbyPhone');
       if (nameInput) nameInput.value = '';
@@ -311,6 +364,9 @@
       modal.querySelectorAll('[data-otp]').forEach(function (input) {
         input.value = '';
       });
+      if (recaptchaWidgetId !== null && typeof grecaptcha !== 'undefined') {
+        try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
+      }
       modal.querySelectorAll('.matter-option').forEach(function (btn) {
         btn.classList.remove('selected');
         btn.setAttribute('aria-selected', 'false');
@@ -358,6 +414,9 @@
       }
 
       if (currentStep === 3) {
+        if (verifyPhase === 'captcha') {
+          return true;
+        }
         var otpInputs = modal.querySelectorAll('[data-otp]');
         var code = '';
         otpInputs.forEach(function (input) {
@@ -464,9 +523,66 @@
       ajaxPost('alf_send_otp', { phone: state.rawPhone, country: state.country }).then(function (res) {
         setBusy(triggerBtn, false);
         if (res && res.success) {
+          verifyPhase = 'otp';
           showStep(3);
         } else {
           var msg = res && res.data && res.data.message ? res.data.message : 'Could not send the code. Please try again.';
+          if (currentStep === 3) {
+            showError('captcha', true, msg);
+          } else {
+            showError('phone', true, msg);
+          }
+        }
+      });
+    }
+
+    function verifyCaptcha(triggerBtn) {
+      if (busy) return;
+      var token = '';
+      if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
+        token = grecaptcha.getResponse(recaptchaWidgetId) || '';
+      } else if (typeof grecaptcha !== 'undefined') {
+        token = grecaptcha.getResponse() || '';
+      }
+      if (!token) {
+        showError('captcha', true, 'Please complete the CAPTCHA.');
+        return;
+      }
+      clearErrors();
+      setBusy(triggerBtn, true, 'Verifying…');
+      ajaxPost('alf_verify_captcha', {
+        captcha_token: token,
+        phone: state.rawPhone,
+        country: state.country
+      }).then(function (res) {
+        setBusy(triggerBtn, false);
+        if (res && res.success) {
+          captchaDone = true;
+          if (smsEnabled) {
+            sendOtp(triggerBtn);
+          } else {
+            showStep(4);
+          }
+        } else {
+          var msg = res && res.data && res.data.message ? res.data.message : 'CAPTCHA failed. Please try again.';
+          showError('captcha', true, msg);
+          if (recaptchaWidgetId !== null && typeof grecaptcha !== 'undefined') {
+            try { grecaptcha.reset(recaptchaWidgetId); } catch (e) { /* ignore */ }
+          }
+        }
+      });
+    }
+
+    function skipVerify(triggerBtn) {
+      if (busy) return;
+      clearErrors();
+      setBusy(triggerBtn, true, 'Continuing…');
+      ajaxPost('alf_skip_verify', { phone: state.rawPhone, country: state.country }).then(function (res) {
+        setBusy(triggerBtn, false);
+        if (res && res.success) {
+          showStep(4);
+        } else {
+          var msg = res && res.data && res.data.message ? res.data.message : 'Could not continue. Please try again.';
           showError('phone', true, msg);
         }
       });
@@ -501,15 +617,29 @@
     function goNext(triggerBtn) {
       if (busy) return;
 
-      // Step 2: validate phone then send SMS via Twilio.
+      // Step 2: phone → CAPTCHA / SMS / skip.
       if (currentStep === 2) {
         if (!validateCurrent()) return;
-        sendOtp(triggerBtn);
+        if (captchaEnabled) {
+          verifyPhase = 'captcha';
+          captchaDone = false;
+          showStep(3);
+          return;
+        }
+        if (smsEnabled) {
+          sendOtp(triggerBtn);
+          return;
+        }
+        skipVerify(triggerBtn);
         return;
       }
 
-      // Step 3: verify the SMS code via Twilio.
+      // Step 3: CAPTCHA or SMS code.
       if (currentStep === 3) {
+        if (verifyPhase === 'captcha') {
+          verifyCaptcha(triggerBtn);
+          return;
+        }
         verifyOtp(triggerBtn);
         return;
       }
@@ -528,6 +658,11 @@
 
     function goBack() {
       if (busy) return;
+      if (currentStep === 3 && verifyPhase === 'otp' && captchaEnabled && captchaDone) {
+        verifyPhase = 'captcha';
+        showStep(3);
+        return;
+      }
       if (currentStep > 0) {
         showStep(currentStep - 1);
       }
@@ -567,7 +702,7 @@
     // Resend code via Twilio
     modal.querySelectorAll('[data-lobby-resend]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        if (busy || !state.rawPhone) return;
+        if (busy || !state.rawPhone || !smsEnabled) return;
         modal.querySelectorAll('[data-otp]').forEach(function (input) {
           input.value = '';
         });
