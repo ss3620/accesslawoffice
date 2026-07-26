@@ -195,6 +195,23 @@ header.site-header {
   box-shadow: 0 0 0 5px #eaf8ef;
 }
 
+.status-closed {
+  color: #8a94a6;
+}
+
+.status-closed .dot {
+  background: #c04545;
+  box-shadow: 0 0 0 5px #f8eaea;
+}
+
+.availability-closed strong {
+  color: #b42318;
+}
+
+.availability-closed small {
+  color: var(--muted);
+}
+
 .hero {
   padding: 72px 0 30px;
   background:

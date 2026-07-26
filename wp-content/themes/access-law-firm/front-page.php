@@ -21,12 +21,19 @@ get_header();
 						<a class="btn btn-secondary" href="tel:+17134892089">Call Now</a>
 					</div>
 				</div>
+				<?php $alf_lobby_open = alf_is_lobby_open(); ?>
 				<div class="portrait">
 					<img src="<?php echo alf_img( 'stock-attorney.jpg' ); ?>" alt="Attorney portrait">
-					<div class="availability">
-						<strong>Virtual Lobby Open</strong>
-						<span>Live assistant available</span><br>
-						<small>● Average wait: approximately 4 minutes</small>
+					<div class="availability<?php echo $alf_lobby_open ? '' : ' availability-closed'; ?>">
+						<?php if ( $alf_lobby_open ) : ?>
+							<strong>Virtual Lobby Open</strong>
+							<span>Live assistant available</span><br>
+							<small>● Average wait: approximately 4 minutes</small>
+						<?php else : ?>
+							<strong>Virtual Lobby Closed</strong>
+							<span>We are currently offline</span><br>
+							<small>Please check back during lobby hours.</small>
+						<?php endif; ?>
 					</div>
 				</div>
 			</div>

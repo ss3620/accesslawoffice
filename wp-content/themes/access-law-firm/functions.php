@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'ALF_THEME_VERSION', '1.0.0' );
 
+require_once get_template_directory() . '/inc/settings.php';
+require_once get_template_directory() . '/inc/twilio-otp.php';
+
 /**
  * Theme setup.
  */
@@ -51,6 +54,17 @@ function alf_enqueue_assets() {
 		array(),
 		ALF_THEME_VERSION,
 		true
+	);
+
+	wp_localize_script(
+		'access-law-firm-main',
+		'alfLobby',
+		array(
+			'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
+			'nonce'        => wp_create_nonce( 'alf_lobby' ),
+			'lobbyOpen'    => alf_is_lobby_open(),
+			'smsConfigured' => alf_twilio_is_configured(),
+		)
 	);
 }
 add_action( 'wp_enqueue_scripts', 'alf_enqueue_assets' );

@@ -37,20 +37,36 @@
 		<button class="lobby-modal-close" type="button" aria-label="Close Virtual Lobby" data-lobby-close>&times;</button>
 
 		<!-- Step 0: Welcome -->
+		<?php $alf_lobby_open = alf_is_lobby_open(); ?>
 		<div class="lobby-step active" data-step="0">
 			<div class="lobby-welcome">
 				<div class="lobby-brand-mark" aria-hidden="true">A</div>
 				<div class="eyebrow" style="color:#f0bd5d">Access Law Firm</div>
-				<h2 id="lobbyModalTitle">Welcome to our Virtual Reception</h2>
-				<p>Check in securely to speak with our live receptionist and connect with the attorney.</p>
-				<div class="lobby-status-box">
-					<strong>Estimated Wait 12–18 Minutes</strong>
-					<div class="lobby-status-row">
-						<span>Lobby Status</span>
-						<span class="lobby-status-open"><span class="dot" style="box-shadow:none"></span> OPEN</span>
+				<?php if ( $alf_lobby_open ) : ?>
+					<h2 id="lobbyModalTitle">Welcome to our Virtual Reception</h2>
+					<p>Check in securely to speak with our live receptionist and connect with the attorney.</p>
+					<div class="lobby-status-box">
+						<strong>Estimated Wait 12–18 Minutes</strong>
+						<div class="lobby-status-row">
+							<span>Lobby Status</span>
+							<span class="lobby-status-open"><span class="dot" style="box-shadow:none"></span> OPEN</span>
+						</div>
 					</div>
-				</div>
-				<button class="btn btn-gold" type="button" data-lobby-next style="width:100%">Enter Lobby</button>
+					<button class="btn btn-gold" type="button" data-lobby-next style="width:100%">Enter Lobby</button>
+				<?php else : ?>
+					<h2 id="lobbyModalTitle">The Virtual Lobby Is Closed</h2>
+					<p>Our live reception is currently offline. Please check back during lobby hours.</p>
+					<div class="lobby-status-box">
+						<strong>Lobby Hours</strong>
+						<div class="lobby-status-row">
+							<span>Mon–Fri</span><span>9:00 AM – 5:00 PM</span>
+						</div>
+						<div class="lobby-status-row">
+							<span>Sat–Sun</span><span>10:00 AM – 3:30 PM</span>
+						</div>
+					</div>
+					<a class="btn btn-secondary" href="tel:+17134892089" style="width:100%">Call the Office</a>
+				<?php endif; ?>
 			</div>
 		</div>
 
@@ -98,15 +114,16 @@
 			<h3 class="lobby-step-title">What is your mobile phone number?</h3>
 			<p class="lobby-step-desc">We will send a 6-digit verification code.</p>
 			<div class="field">
-				<label for="lobbyPhone">U.S. mobile number</label>
+				<label for="lobbyPhone">Mobile phone number</label>
 				<div class="phone-row">
-					<select id="lobbyCountry" aria-label="Country code" disabled>
-						<option value="+1">🇺🇸 +1</option>
+					<select id="lobbyCountry" aria-label="Country code">
+						<option value="+1" data-placeholder="(713) 555-0123">🇺🇸 +1</option>
+						<option value="+91" data-placeholder="98765 43210">🇮🇳 +91</option>
 					</select>
 					<input type="tel" id="lobbyPhone" name="phone" placeholder="(713) 555-0123" autocomplete="tel">
 				</div>
-				<div class="lobby-error" data-error-for="phone">Please enter a valid 10-digit U.S. phone number.</div>
-				<div class="phone-info">A 6-digit code will be sent to this number for verification. Standard message rates may apply.</div>
+				<div class="lobby-error" data-error-for="phone">Please enter a valid 10-digit mobile number.</div>
+				<div class="phone-info">A 6-digit code will be sent by SMS for verification. Standard message rates may apply.</div>
 			</div>
 			<div class="lobby-actions">
 				<button class="btn btn-primary" type="button" data-lobby-next>Send Code →</button>

@@ -27,6 +27,10 @@
 			<a href="#faq">FAQ</a>
 			<button class="btn btn-primary open-lobby" type="button">Join Virtual Lobby</button>
 		</nav>
-		<div class="status"><span class="dot" aria-hidden="true"></span>Virtual Lobby Open</div>
+		<?php $alf_lobby_open = alf_is_lobby_open(); ?>
+		<div class="status<?php echo $alf_lobby_open ? '' : ' status-closed'; ?>">
+			<span class="dot" aria-hidden="true"></span>
+			<?php echo $alf_lobby_open ? esc_html__( 'Virtual Lobby Open', 'access-law-firm' ) : esc_html__( 'Virtual Lobby Closed', 'access-law-firm' ); ?>
+		</div>
 	</div>
 </header>
