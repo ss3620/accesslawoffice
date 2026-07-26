@@ -375,6 +375,15 @@ function alf_render_lobby_queue_page() {
 
 	$is_open   = alf_is_lobby_open();
 	$teams_url = alf_get_setting( 'teams_meeting_url', '' );
+
+	if ( isset( $_GET['alf_lobby_toggled'] ) ) {
+		$toggled_open = '1' === (string) wp_unslash( $_GET['alf_lobby_toggled'] );
+		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html(
+			$toggled_open
+				? __( 'Virtual Lobby is now Open.', 'access-law-firm' )
+				: __( 'Virtual Lobby is now Closed.', 'access-law-firm' )
+		) . '</p></div>';
+	}
 	?>
 	<div class="wrap alf-lobby-console">
 		<h1><?php esc_html_e( 'Virtual Lobby Queue', 'access-law-firm' ); ?></h1>
@@ -390,11 +399,7 @@ function alf_render_lobby_queue_page() {
 					?>
 				</strong>
 			</div>
-			<label class="alf-lobby-toggle">
-				<input type="checkbox" id="alf-lobby-open-toggle" value="1" <?php checked( $is_open, true ); ?>>
-				<?php esc_html_e( 'Virtual Lobby Open', 'access-law-firm' ); ?>
-			</label>
-			<span id="alf-lobby-widget-message" class="alf-lobby-widget-message" hidden></span>
+			<?php alf_render_lobby_toggle_control( 'console' ); ?>
 		</div>
 
 		<?php if ( ! $teams_url && current_user_can( 'manage_options' ) ) : ?>
@@ -449,18 +454,13 @@ function alf_render_lobby_queue_page() {
 }
 
 /**
- * Enqueue lobby console + dashboard widget scripts.
+ * Enqueue lobby queue scripts (toggle uses form POST — no JS required).
  *
  * @param string $hook Current admin page hook.
  */
 function alf_enqueue_lobby_admin_assets( $hook ) {
-	$on_dashboard = ( 'index.php' === $hook );
-	$on_console   = ( is_string( $hook ) && false !== strpos( $hook, 'alf-virtual-lobby' ) );
-
-	if ( ! $on_dashboard && ! $on_console ) {
-		return;
-	}
-	if ( ! alf_user_can_manage_lobby() ) {
+	$on_console = ( is_string( $hook ) && false !== strpos( $hook, 'alf-virtual-lobby' ) );
+	if ( ! $on_console || ! alf_user_can_manage_lobby() ) {
 		return;
 	}
 
@@ -474,17 +474,8 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
 	$js = <<<'JS'
 (function () {
   var cfg = window.alfLobbyAdmin || {};
-  var toggle = document.getElementById('alf-lobby-open-toggle');
-  var label = document.getElementById('alf-console-status-label') || document.getElementById('alf-lobby-status-label');
-  var dot = document.getElementById('alf-console-dot') || document.querySelector('.alf-lobby-dot');
-  var message = document.getElementById('alf-lobby-widget-message');
-
-  function setMessage(text, ok) {
-    if (!message) return;
-    message.hidden = !text;
-    message.textContent = text || '';
-    message.className = 'alf-lobby-widget-message ' + (ok ? 'is-success' : 'is-error');
-  }
+  var bodyEl = document.getElementById('alf-queue-body');
+  if (!bodyEl) return;
 
   function post(action, data) {
     var body = new URLSearchParams();
@@ -498,45 +489,11 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
       body: body.toString()
     }).then(function (r) {
       return r.text().then(function (text) {
-        try {
-          return JSON.parse(text);
-        } catch (e) {
-          return { success: false, data: { message: 'Unexpected response. Please reload and try again.' } };
-        }
+        try { return JSON.parse(text); }
+        catch (e) { return { success: false, data: { message: 'Unexpected response.' } }; }
       });
     });
   }
-
-  if (toggle) {
-    toggle.addEventListener('change', function () {
-      var open = toggle.checked ? 1 : 0;
-      toggle.disabled = true;
-      setMessage('Saving…', true);
-      post('alf_toggle_lobby', { lobby_open: String(open) }).then(function (res) {
-        toggle.disabled = false;
-        if (res && res.success) {
-          var isOpen = !!(res.data && res.data.open);
-          toggle.checked = isOpen;
-          if (label) label.textContent = isOpen ? 'Virtual Lobby Open' : 'Virtual Lobby Closed';
-          if (dot) {
-            dot.classList.toggle('is-open', isOpen);
-            dot.classList.toggle('is-closed', !isOpen);
-          }
-          setMessage((res.data && res.data.message) || 'Saved.', true);
-        } else {
-          toggle.checked = !open;
-          setMessage((res && res.data && res.data.message) || 'Could not save.', false);
-        }
-      }).catch(function () {
-        toggle.disabled = false;
-        toggle.checked = !open;
-        setMessage('Network error.', false);
-      });
-    });
-  }
-
-  var bodyEl = document.getElementById('alf-queue-body');
-  if (!bodyEl) return;
 
   function escapeHtml(s) {
     return String(s || '').replace(/[&<>"']/g, function (c) {
@@ -574,11 +531,8 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
 
   function loadQueue() {
     post('alf_queue_list', {}).then(function (res) {
-      if (res && res.success) {
-        renderQueue(res.data.items || []);
-      } else {
-        bodyEl.innerHTML = '<tr><td colspan="7">Could not load queue.</td></tr>';
-      }
+      if (res && res.success) renderQueue(res.data.items || []);
+      else bodyEl.innerHTML = '<tr><td colspan="7">Could not load queue.</td></tr>';
     }).catch(function () {
       bodyEl.innerHTML = '<tr><td colspan="7">Network error loading queue.</td></tr>';
     });
@@ -588,13 +542,13 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
     var btn = e.target.closest('[data-action][data-id]');
     if (!btn) return;
     btn.disabled = true;
-    post('alf_queue_update', { visit_id: btn.getAttribute('data-id'), queue_action: btn.getAttribute('data-action') }).then(function (res) {
+    post('alf_queue_update', {
+      visit_id: btn.getAttribute('data-id'),
+      queue_action: btn.getAttribute('data-action')
+    }).then(function (res) {
       btn.disabled = false;
-      if (res && res.success) {
-        loadQueue();
-      } else {
-        alert((res && res.data && res.data.message) || 'Update failed.');
-      }
+      if (res && res.success) loadQueue();
+      else alert((res && res.data && res.data.message) || 'Update failed.');
     }).catch(function () {
       btn.disabled = false;
       alert('Network error.');
@@ -606,15 +560,14 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
 })();
 JS;
 
-	wp_register_script( 'alf-lobby-admin', '', array(), ALF_THEME_VERSION, true );
-	wp_enqueue_script( 'alf-lobby-admin' );
-	wp_add_inline_script( 'alf-lobby-admin', 'window.alfLobbyAdmin = ' . $cfg . ';', 'before' );
-	wp_add_inline_script( 'alf-lobby-admin', $js, 'after' );
+	wp_enqueue_script( 'jquery' );
+	wp_add_inline_script( 'jquery', 'window.alfLobbyAdmin = ' . $cfg . ';', 'before' );
+	wp_add_inline_script( 'jquery', $js, 'after' );
 }
 add_action( 'admin_enqueue_scripts', 'alf_enqueue_lobby_admin_assets' );
 
 /**
- * AJAX: toggle Virtual Lobby open/closed.
+ * AJAX: toggle Virtual Lobby open/closed (optional; form POST is primary).
  */
 function alf_ajax_toggle_lobby() {
 	if ( ! check_ajax_referer( 'alf_lobby_admin', 'nonce', false ) ) {
@@ -625,9 +578,8 @@ function alf_ajax_toggle_lobby() {
 		wp_send_json_error( array( 'message' => __( 'You do not have permission to change this.', 'access-law-firm' ) ), 403 );
 	}
 
-	// Do not use empty() — PHP empty("0") is true and would always force Closed.
 	$open = ( isset( $_POST['lobby_open'] ) && (string) wp_unslash( $_POST['lobby_open'] ) === '1' ) ? 1 : 0;
-	alf_update_setting( 'lobby_open', $open );
+	alf_set_lobby_open( $open );
 
 	wp_send_json_success(
 		array(

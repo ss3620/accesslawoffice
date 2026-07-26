@@ -55,11 +55,42 @@ function alf_update_setting( $key, $value ) {
 /**
  * Whether the Virtual Lobby is currently open.
  *
+ * Uses dedicated option `alf_lobby_open` (1/0) so saves are reliable.
+ *
  * @return bool
  */
 function alf_is_lobby_open() {
-	// Cast via int so string "0" from the options table is correctly treated as closed.
-	return 1 === (int) alf_get_setting( 'lobby_open', 1 );
+	$stored = get_option( 'alf_lobby_open', '__missing__' );
+
+	if ( '__missing__' !== $stored ) {
+		return 1 === (int) $stored;
+	}
+
+	// One-time migrate from older alf_settings['lobby_open'] if present.
+	$legacy = alf_get_setting( 'lobby_open', null );
+	if ( null !== $legacy && '' !== $legacy ) {
+		$open = 1 === (int) $legacy ? 1 : 0;
+		update_option( 'alf_lobby_open', $open, true );
+		return (bool) $open;
+	}
+
+	// Default: open.
+	return true;
+}
+
+/**
+ * Persist lobby open/closed status.
+ *
+ * @param bool|int $open Open state.
+ * @return bool Whether the option was updated.
+ */
+function alf_set_lobby_open( $open ) {
+	$value   = $open ? 1 : 0;
+	$updated = update_option( 'alf_lobby_open', $value, true );
+	// update_option returns false when value is unchanged — still a success for our purposes.
+	wp_cache_delete( 'alf_lobby_open', 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+	return true;
 }
 
 /**
@@ -67,10 +98,11 @@ function alf_is_lobby_open() {
  */
 function alf_ajax_public_lobby_status() {
 	nocache_headers();
+	$open = alf_is_lobby_open();
 	wp_send_json_success(
 		array(
-			'open'  => alf_is_lobby_open(),
-			'label' => alf_is_lobby_open()
+			'open'  => $open,
+			'label' => $open
 				? __( 'Virtual Lobby Open', 'access-law-firm' )
 				: __( 'Virtual Lobby Closed', 'access-law-firm' ),
 		)
@@ -78,6 +110,66 @@ function alf_ajax_public_lobby_status() {
 }
 add_action( 'wp_ajax_alf_lobby_status', 'alf_ajax_public_lobby_status' );
 add_action( 'wp_ajax_nopriv_alf_lobby_status', 'alf_ajax_public_lobby_status' );
+
+/**
+ * Admin-post handler: toggle lobby via normal form submit (works without JS).
+ */
+function alf_handle_lobby_toggle_form() {
+	if ( ! isset( $_POST['alf_lobby_toggle_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['alf_lobby_toggle_nonce'] ) ), 'alf_lobby_toggle' ) ) {
+		wp_die( esc_html__( 'Security check failed.', 'access-law-firm' ), 403 );
+	}
+
+	if ( ! function_exists( 'alf_user_can_manage_lobby' ) || ! alf_user_can_manage_lobby() ) {
+		wp_die( esc_html__( 'You do not have permission to change this.', 'access-law-firm' ), 403 );
+	}
+
+	// Hidden field sends 0; checked checkbox sends 1 (last value wins in PHP).
+	$raw  = isset( $_POST['lobby_open'] ) ? wp_unslash( $_POST['lobby_open'] ) : '0';
+	if ( is_array( $raw ) ) {
+		$raw = end( $raw );
+	}
+	$open = ( '1' === (string) $raw ) ? 1 : 0;
+	alf_set_lobby_open( $open );
+
+	$redirect = wp_get_referer();
+	if ( ! $redirect ) {
+		$redirect = admin_url( 'admin.php?page=alf-virtual-lobby' );
+	}
+	$redirect = add_query_arg( 'alf_lobby_toggled', $open ? '1' : '0', $redirect );
+	wp_safe_redirect( $redirect );
+	exit;
+}
+add_action( 'admin_post_alf_lobby_toggle', 'alf_handle_lobby_toggle_form' );
+
+/**
+ * Markup for the lobby open/close control (form submit — no JS required).
+ *
+ * @param string $context 'dashboard' or 'console'.
+ */
+function alf_render_lobby_toggle_control( $context = 'console' ) {
+	$is_open = alf_is_lobby_open();
+	$dot_id  = ( 'console' === $context ) ? 'alf-console-dot' : '';
+	$label_id = ( 'console' === $context ) ? 'alf-console-status-label' : 'alf-lobby-status-label';
+	?>
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="alf-lobby-toggle-form" style="display:contents">
+		<?php wp_nonce_field( 'alf_lobby_toggle', 'alf_lobby_toggle_nonce' ); ?>
+		<input type="hidden" name="action" value="alf_lobby_toggle">
+		<input type="hidden" name="lobby_open" value="0">
+		<label class="alf-lobby-toggle">
+			<input
+				type="checkbox"
+				id="alf-lobby-open-toggle"
+				name="lobby_open"
+				value="1"
+				<?php checked( $is_open, true ); ?>
+				onchange="this.form.submit()"
+			>
+			<?php esc_html_e( 'Virtual Lobby Open', 'access-law-firm' ); ?>
+		</label>
+	</form>
+	<?php
+	unset( $dot_id, $label_id );
+}
 
 /**
  * Whether Twilio is fully configured.
@@ -279,6 +371,15 @@ add_action( 'wp_dashboard_setup', 'alf_register_dashboard_widget' );
  */
 function alf_render_dashboard_widget() {
 	$is_open = alf_is_lobby_open();
+
+	if ( isset( $_GET['alf_lobby_toggled'] ) ) {
+		$toggled_open = '1' === (string) wp_unslash( $_GET['alf_lobby_toggled'] );
+		echo '<div class="notice notice-success inline"><p>' . esc_html(
+			$toggled_open
+				? __( 'Virtual Lobby is now Open.', 'access-law-firm' )
+				: __( 'Virtual Lobby is now Closed.', 'access-law-firm' )
+		) . '</p></div>';
+	}
 	?>
 	<div class="alf-lobby-widget">
 		<p class="alf-lobby-widget-status">
@@ -301,22 +402,15 @@ function alf_render_dashboard_widget() {
 			?>
 		</p>
 		<p>
-			<label class="alf-lobby-toggle">
-				<input type="checkbox" id="alf-lobby-open-toggle" value="1" <?php checked( $is_open, true ); ?>>
-				<?php esc_html_e( 'Virtual Lobby Open', 'access-law-firm' ); ?>
-			</label>
+			<?php alf_render_lobby_toggle_control( 'dashboard' ); ?>
 		</p>
-		<p id="alf-lobby-widget-message" class="alf-lobby-widget-message" hidden></p>
 	</div>
 	<style>
 		.alf-lobby-widget-status { display: flex; align-items: center; gap: 10px; font-size: 15px; margin-bottom: 8px; }
 		.alf-lobby-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: none; }
 		.alf-lobby-dot.is-open { background: #27b05d; box-shadow: 0 0 0 4px #eaf8ef; }
 		.alf-lobby-dot.is-closed { background: #d92d20; box-shadow: 0 0 0 4px #fdeceb; }
-		.alf-lobby-toggle { font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
-		.alf-lobby-widget-message { margin-top: 8px; }
-		.alf-lobby-widget-message.is-success { color: #1a7f37; }
-		.alf-lobby-widget-message.is-error { color: #b42318; }
+		.alf-lobby-toggle { font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 	</style>
 	<?php
 }
