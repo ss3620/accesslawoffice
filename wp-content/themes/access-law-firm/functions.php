@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ALF_THEME_VERSION', '1.2.1' );
+define( 'ALF_THEME_VERSION', '1.2.2' );
 
 require_once get_template_directory() . '/inc/settings.php';
 require_once get_template_directory() . '/inc/twilio-otp.php';
@@ -52,11 +52,11 @@ function alf_enqueue_assets() {
 	);
 
 	$deps = array();
-	$deps = array();
 	if ( function_exists( 'alf_captcha_enabled' ) && alf_captcha_enabled() ) {
+		$site_key = function_exists( 'alf_recaptcha_site_key' ) ? rawurlencode( alf_recaptcha_site_key() ) : '';
 		wp_enqueue_script(
 			'google-recaptcha',
-			'https://www.google.com/recaptcha/api.js?render=explicit',
+			'https://www.google.com/recaptcha/api.js?render=' . $site_key,
 			array(),
 			null,
 			true

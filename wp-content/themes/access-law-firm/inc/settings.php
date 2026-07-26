@@ -217,7 +217,7 @@ function alf_captcha_keys_admin_notice() {
 
 	$url = admin_url( 'options-general.php?page=access-law-firm' );
 	echo '<div class="notice notice-warning"><p>';
-	echo esc_html__( 'Virtual Lobby is using CAPTCHA (SMS is off until Twilio is ready). Add your Google reCAPTCHA v2 keys under', 'access-law-firm' );
+	echo esc_html__( 'Virtual Lobby is using CAPTCHA (SMS is off until Twilio is ready). Add your Google reCAPTCHA v3 keys under', 'access-law-firm' );
 	echo ' <a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings → Access Law Firm', 'access-law-firm' ) . '</a>';
 	echo ' ' . esc_html__( 'or spam protection will not run.', 'access-law-firm' );
 	echo '</p></div>';
@@ -266,7 +266,7 @@ function alf_register_settings() {
 		'alf_verify_section',
 		array(
 			'key'         => 'captcha_enabled',
-			'label'       => __( 'Require Google reCAPTCHA before check-in', 'access-law-firm' ),
+			'label'       => __( 'Require Google reCAPTCHA v3 before check-in', 'access-law-firm' ),
 			'default'     => 1,
 		)
 	);
@@ -342,7 +342,7 @@ function alf_verify_section_intro() {
 		esc_html_e( 'Phone collected only — enable CAPTCHA keys or SMS', 'access-law-firm' );
 	}
 	echo '</p>';
-	echo '<p class="description">' . esc_html__( 'Create keys at Google reCAPTCHA — choose v2 “I’m not a robot” Checkbox. Add domains: accesslawoffice.com and www.accesslawoffice.com (and localhost for local testing).', 'access-law-firm' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Use Google reCAPTCHA v3 keys (not v2). Add domains: accesslawoffice.com and www.accesslawoffice.com. “Invalid key type” means the keys are v2 — create a v3 key pair instead, or ask us to switch the theme back to v2.', 'access-law-firm' ) . '</p>';
 }
 
 /**
