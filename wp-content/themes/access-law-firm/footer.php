@@ -335,6 +335,7 @@
 					Join Reception
 				</button>
 			</div>
+			<div class="lobby-error" id="lobbyJoinError" data-error-for="join">Meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.</div>
 			<p class="lobby-powered">Powered by Microsoft Teams</p>
 		</div>
 	</div>

@@ -208,6 +208,7 @@
       teamsUrl: ''
     };
     var pollTimer = null;
+    var pollListenersBound = false;
 
     function applyPhoneStepCopy() {
       var desc = document.getElementById('lobbyPhoneDesc');
@@ -474,34 +475,80 @@
       }
     }
 
-    function startPolling() {
-      stopPolling();
-      var tick = function () {
-        if (!state.visitId || !state.visitToken) return;
-        ajaxPost('alf_visit_status', {
-          visit_id: String(state.visitId),
-          token: state.visitToken
-        }).then(function (res) {
-          if (!res || !res.success) return;
-          var data = res.data || {};
+    function setWaitNote(message) {
+      var noteEl = document.getElementById('lobbyWaitNote');
+      if (noteEl) noteEl.textContent = message || '';
+    }
+
+    function pollVisitStatus() {
+      if (!state.visitId || !state.visitToken) return;
+      // Only poll while on the waiting step (or until we advance).
+      if (currentStep !== 5 && currentStep !== 6) return;
+
+      ajaxPost('alf_visit_status', {
+        visit_id: String(state.visitId),
+        token: state.visitToken
+      }).then(function (res) {
+        if (!res || !res.success) {
+          var msg = res && res.data && res.data.message
+            ? res.data.message
+            : 'Connection issue while waiting. Keep this tab open — we will keep trying.';
+          if (currentStep === 5) setWaitNote(msg);
+          return;
+        }
+
+        var data = res.data || {};
+        if (currentStep === 5) {
           updateWaitUi(data.position, data.status_label);
-          if (data.status === 'ready' || data.status === 'in_meeting') {
-            state.teamsUrl = data.teams_url || '';
-            stopPolling();
-            showStep(6);
-          } else if (data.status === 'dismissed' || data.status === 'completed') {
-            stopPolling();
-            var noteEl = document.getElementById('lobbyWaitNote');
-            if (noteEl) {
-              noteEl.textContent = data.status === 'dismissed'
-                ? 'This check-in was closed by the receptionist. Please try again later.'
-                : 'Your visit was marked complete.';
+        }
+
+        if (data.status === 'ready' || data.status === 'in_meeting') {
+          state.teamsUrl = data.teams_url || '';
+          stopPolling();
+          showStep(6);
+          var joinErr = document.getElementById('lobbyJoinError');
+          if (joinErr) {
+            if (state.teamsUrl) {
+              joinErr.classList.remove('show');
+            } else {
+              joinErr.textContent = 'Meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
+              joinErr.classList.add('show');
             }
           }
-        });
-      };
-      tick();
-      pollTimer = setInterval(tick, 5000);
+        } else if (data.status === 'dismissed' || data.status === 'completed') {
+          stopPolling();
+          setWaitNote(
+            data.status === 'dismissed'
+              ? 'This check-in was closed by the receptionist. Please try again later.'
+              : 'Your visit was marked complete.'
+          );
+        } else if (currentStep === 5) {
+          setWaitNote('Waiting for the receptionist…');
+        }
+      });
+    }
+
+    function onPollWake() {
+      if (document.visibilityState && document.visibilityState !== 'visible') return;
+      if (!state.visitId || !state.visitToken) return;
+      if (currentStep !== 5) return;
+      pollVisitStatus();
+    }
+
+    function startPolling() {
+      stopPolling();
+      pollVisitStatus();
+      pollTimer = setInterval(function () {
+        // Skip ticks while the tab is hidden; visibility/focus handlers catch up.
+        if (document.visibilityState && document.visibilityState !== 'visible') return;
+        pollVisitStatus();
+      }, 2000);
+
+      if (!pollListenersBound) {
+        pollListenersBound = true;
+        document.addEventListener('visibilitychange', onPollWake);
+        window.addEventListener('focus', onPollWake);
+      }
     }
 
     function submitCheckIn(triggerBtn) {
@@ -768,10 +815,17 @@
     // Join Reception — open Teams meeting
     modal.querySelectorAll('[data-lobby-join]').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        var joinErr = document.getElementById('lobbyJoinError');
         if (!state.teamsUrl) {
-          alert('The Teams meeting link is not available yet. Please wait a moment or contact the office.');
+          if (joinErr) {
+            joinErr.textContent = 'Meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
+            joinErr.classList.add('show');
+          }
+          // One more status poll in case the link was saved after Ready.
+          pollVisitStatus();
           return;
         }
+        if (joinErr) joinErr.classList.remove('show');
         if (state.visitId && state.visitToken) {
           ajaxPost('alf_visit_joined', {
             visit_id: String(state.visitId),

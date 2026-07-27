@@ -231,7 +231,9 @@ function alf_ajax_visit_status() {
 	);
 
 	if ( in_array( $status, array( 'ready', 'in_meeting' ), true ) ) {
-		$payload['teams_url'] = esc_url_raw( alf_teams_meeting_url() );
+		// Return the stored URL as-is (already sanitized on save). A second
+		// esc_url_raw() can blank long Microsoft Teams join links.
+		$payload['teams_url'] = alf_teams_meeting_url();
 	}
 
 	wp_send_json_success( $payload );
