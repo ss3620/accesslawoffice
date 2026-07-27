@@ -45,6 +45,19 @@
       });
     }
 
+    function applyWelcomeWait(waitingCount) {
+      var el = document.getElementById('lobbyWelcomeWait');
+      if (!el) return;
+      var n = Math.max(0, parseInt(waitingCount, 10) || 0);
+      if (n <= 0) {
+        el.textContent = 'You’re next';
+      } else if (n === 1) {
+        el.textContent = '1 person ahead of you';
+      } else {
+        el.textContent = n + ' people ahead of you';
+      }
+    }
+
     function fetchStatus(force) {
       var now = Date.now();
       if (inFlight) return;
@@ -69,6 +82,9 @@
       }).then(function (res) {
         if (res && res.success && res.data) {
           applyLobbyOpen(!!res.data.open);
+          if (typeof res.data.waiting_count !== 'undefined') {
+            applyWelcomeWait(res.data.waiting_count);
+          }
         }
       }).catch(function () { /* ignore transient network errors */ })
         .finally(function () { inFlight = false; });
@@ -78,6 +94,7 @@
     window.alfRefreshLobbyStatus = function () {
       fetchStatus(true);
     };
+    window.alfApplyWelcomeWait = applyWelcomeWait;
 
     // Once on load (fixes cached HTML). No setInterval.
     fetchStatus(true);
@@ -349,6 +366,11 @@
       if (typeof window.alfRefreshLobbyStatus === 'function') {
         window.alfRefreshLobbyStatus();
       }
+      ajaxPost('alf_lobby_queue_snapshot', {}).then(function (res) {
+        if (res && res.success && res.data && typeof window.alfApplyWelcomeWait === 'function') {
+          window.alfApplyWelcomeWait(res.data.waiting_count);
+        }
+      });
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('lobby-open');
@@ -468,10 +490,24 @@
       var posEl = document.getElementById('lobbyWaitPosition');
       var statusEl = document.getElementById('lobbyWaitStatus');
       var noteEl = document.getElementById('lobbyWaitNote');
-      if (posEl) posEl.textContent = position ? '#' + position : '—';
+      var remainEl = document.getElementById('lobbyWaitRemain');
+      var pos = parseInt(position, 10) || 0;
+      if (posEl) posEl.textContent = pos ? '#' + pos : '—';
       if (statusEl) statusEl.textContent = statusLabel || 'Waiting';
       if (noteEl && statusLabel === 'Waiting') {
         noteEl.textContent = 'Waiting for the receptionist…';
+      }
+      if (remainEl) {
+        var ahead = Math.max(0, pos - 1);
+        var line;
+        if (!pos || ahead === 0) {
+          line = 'You’re next in line';
+        } else if (ahead === 1) {
+          line = '1 person ahead of you';
+        } else {
+          line = ahead + ' people ahead of you';
+        }
+        remainEl.textContent = 'Please remain on this page · ' + line;
       }
     }
 

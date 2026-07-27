@@ -47,7 +47,7 @@
 					<h2 id="lobbyModalTitle">Welcome to our Virtual Reception</h2>
 					<p>A live receptionist will greet you before you speak with your attorney.</p>
 					<div class="lobby-status-box">
-						<strong>Estimated Wait 12–18 Minutes</strong>
+						<strong id="lobbyWelcomeWait">You’re next</strong>
 						<div class="lobby-status-row">
 							<span>Lobby Status</span>
 							<span class="lobby-status-open"><span class="dot" style="box-shadow:none"></span> OPEN</span>
@@ -314,7 +314,7 @@
 					<span id="lobbyWaitPosition">—</span>
 				</div>
 			</div>
-			<p class="lobby-remain">Please remain on this page · Estimated wait about 12 minutes</p>
+			<p class="lobby-remain" id="lobbyWaitRemain">Please remain on this page · You’re next in line</p>
 			<div class="lobby-pulse" aria-hidden="true"><span></span><span></span><span></span></div>
 			<p class="note" id="lobbyWaitNote" style="text-align:center;margin-top:10px">Waiting for the receptionist…</p>
 		</div>

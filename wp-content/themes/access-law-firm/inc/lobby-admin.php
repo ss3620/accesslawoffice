@@ -334,6 +334,7 @@ function alf_render_lobby_settings_page() {
 					<td>
 						<input type="text" class="large-text" id="teams_meeting_url" name="teams_meeting_url" value="<?php echo esc_attr( $teams_url ); ?>" placeholder="https://teams.microsoft.com/l/meetup-join/..." autocomplete="off" spellcheck="false">
 						<p class="description"><?php esc_html_e( 'In Teams: Meeting → Share invite → Copy meeting link. Paste the full https:// link here, then click Save Settings.', 'access-law-firm' ); ?></p>
+						<p class="description"><?php esc_html_e( 'After reception intake, transfer to the attorney is manual: add the attorney to this meeting or send the client a separate attorney meeting link. Automated transfer is not built yet.', 'access-law-firm' ); ?></p>
 					</td>
 				</tr>
 			</table>
@@ -423,6 +424,7 @@ function alf_render_lobby_queue_page() {
 		<?php endif; ?>
 
 		<p class="description"><?php esc_html_e( 'Queue refreshes automatically. Click Ready when you can greet the visitor; they will see “Join Reception” with the Teams link.', 'access-law-firm' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Attorney handoff is manual for now: after intake, invite/add the attorney into the same Teams meeting, or share a separate attorney meeting link. Automated transfer is not built yet.', 'access-law-firm' ); ?></p>
 
 		<table class="wp-list-table widefat fixed striped" id="alf-queue-table">
 			<thead>

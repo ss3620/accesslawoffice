@@ -155,10 +155,13 @@ function alf_set_lobby_open( $open ) {
 function alf_ajax_public_lobby_status() {
 	nocache_headers();
 	$open = alf_is_lobby_open();
+	$waiting = function_exists( 'alf_waiting_count' ) ? (int) alf_waiting_count( 0 ) : 0;
 	wp_send_json_success(
 		array(
-			'open'  => $open,
-			'label' => $open
+			'open'          => $open,
+			'lobby_open'    => $open,
+			'waiting_count' => $waiting,
+			'label'         => $open
 				? __( 'Virtual Lobby Open', 'access-law-firm' )
 				: __( 'Virtual Lobby Closed', 'access-law-firm' ),
 		)

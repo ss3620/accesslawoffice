@@ -195,6 +195,23 @@ add_action( 'wp_ajax_alf_check_in', 'alf_ajax_check_in' );
 add_action( 'wp_ajax_nopriv_alf_check_in', 'alf_ajax_check_in' );
 
 /**
+ * Public AJAX: queue snapshot for welcome wait copy (people ahead).
+ */
+function alf_ajax_lobby_queue_snapshot() {
+	check_ajax_referer( 'alf_lobby', 'nonce' );
+	nocache_headers();
+
+	wp_send_json_success(
+		array(
+			'lobby_open'    => function_exists( 'alf_is_lobby_open' ) && alf_is_lobby_open(),
+			'waiting_count' => (int) alf_waiting_count( 0 ),
+		)
+	);
+}
+add_action( 'wp_ajax_alf_lobby_queue_snapshot', 'alf_ajax_lobby_queue_snapshot' );
+add_action( 'wp_ajax_nopriv_alf_lobby_queue_snapshot', 'alf_ajax_lobby_queue_snapshot' );
+
+/**
  * Public AJAX: poll visit status (client waiting room).
  */
 function alf_ajax_visit_status() {

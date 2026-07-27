@@ -28,7 +28,7 @@ get_header();
 						<div data-lobby-avail-open <?php echo $alf_lobby_open ? '' : 'hidden'; ?>>
 							<strong>Virtual Lobby Open</strong>
 							<span>Live assistant available</span><br>
-							<small>● Average wait: approximately 4 minutes</small>
+							<small>● Live receptionist available</small>
 						</div>
 						<div data-lobby-avail-closed <?php echo $alf_lobby_open ? 'hidden' : ''; ?>>
 							<strong>Virtual Lobby Closed</strong>
