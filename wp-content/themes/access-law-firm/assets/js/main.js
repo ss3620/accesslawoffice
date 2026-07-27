@@ -222,7 +222,8 @@
       verifyToken: '',
       visitId: 0,
       visitToken: '',
-      teamsUrl: ''
+      teamsUrl: '',
+      attorneyUrl: ''
     };
     var pollTimer = null;
     var pollListenersBound = false;
@@ -383,7 +384,7 @@
       modal.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('lobby-open');
       // Reset for next visit
-      state = { name: '', phone: '', rawPhone: '', country: '+1', otp: '', matter: '', verifyToken: '', visitId: 0, visitToken: '', teamsUrl: '' };
+      state = { name: '', phone: '', rawPhone: '', country: '+1', otp: '', matter: '', verifyToken: '', visitId: 0, visitToken: '', teamsUrl: '', attorneyUrl: '' };
       selectedMatter = '';
       captchaDone = false;
       verifyPhase = captchaEnabled ? 'captcha' : 'otp';
@@ -518,8 +519,8 @@
 
     function pollVisitStatus() {
       if (!state.visitId || !state.visitToken) return;
-      // Only poll while on the waiting step (or until we advance).
-      if (currentStep !== 5 && currentStep !== 6) return;
+      // Poll while waiting, in reception, or until attorney / closed.
+      if (currentStep !== 5 && currentStep !== 6 && currentStep !== 7) return;
 
       ajaxPost('alf_visit_status', {
         visit_id: String(state.visitId),
@@ -538,10 +539,24 @@
           updateWaitUi(data.position, data.status_label);
         }
 
-        if (data.status === 'ready' || data.status === 'in_meeting') {
+        if (data.status === 'with_attorney' || data.phase === 'attorney') {
+          state.attorneyUrl = data.teams_url || '';
+          showStep(7);
+          var attErr = document.getElementById('lobbyAttorneyJoinError');
+          if (attErr) {
+            if (state.attorneyUrl) {
+              attErr.classList.remove('show');
+            } else {
+              attErr.textContent = 'Attorney meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
+              attErr.classList.add('show');
+            }
+          }
+          // Keep polling lightly so Complete/Dismiss still updates; stop only on terminal states.
+        } else if (data.status === 'ready' || data.status === 'in_meeting' || data.phase === 'reception') {
           state.teamsUrl = data.teams_url || '';
-          stopPolling();
-          showStep(6);
+          if (currentStep === 5 || currentStep === 6) {
+            showStep(6);
+          }
           var joinErr = document.getElementById('lobbyJoinError');
           if (joinErr) {
             if (state.teamsUrl) {
@@ -551,13 +566,16 @@
               joinErr.classList.add('show');
             }
           }
+          // Do NOT stop polling — Transfer to Attorney must still be detected.
         } else if (data.status === 'dismissed' || data.status === 'completed') {
           stopPolling();
-          setWaitNote(
-            data.status === 'dismissed'
-              ? 'This check-in was closed by the receptionist. Please try again later.'
-              : 'Your visit was marked complete.'
-          );
+          if (currentStep === 5) {
+            setWaitNote(
+              data.status === 'dismissed'
+                ? 'This check-in was closed by the receptionist. Please try again later.'
+                : 'Your visit was marked complete.'
+            );
+          }
         } else if (currentStep === 5) {
           setWaitNote('Waiting for the receptionist…');
         }
@@ -567,7 +585,7 @@
     function onPollWake() {
       if (document.visibilityState && document.visibilityState !== 'visible') return;
       if (!state.visitId || !state.visitToken) return;
-      if (currentStep !== 5) return;
+      if (currentStep !== 5 && currentStep !== 6 && currentStep !== 7) return;
       pollVisitStatus();
     }
 
@@ -848,16 +866,20 @@
       });
     });
 
-    // Join Reception — open Teams meeting
+    // Join Reception / Join Attorney — open Teams meeting
     modal.querySelectorAll('[data-lobby-join]').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var joinErr = document.getElementById('lobbyJoinError');
-        if (!state.teamsUrl) {
+        var kind = btn.getAttribute('data-lobby-join') || 'reception';
+        var url = kind === 'attorney' ? state.attorneyUrl : state.teamsUrl;
+        var errId = kind === 'attorney' ? 'lobbyAttorneyJoinError' : 'lobbyJoinError';
+        var joinErr = document.getElementById(errId);
+        if (!url) {
           if (joinErr) {
-            joinErr.textContent = 'Meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
+            joinErr.textContent = kind === 'attorney'
+              ? 'Attorney meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.'
+              : 'Meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
             joinErr.classList.add('show');
           }
-          // One more status poll in case the link was saved after Ready.
           pollVisitStatus();
           return;
         }
@@ -868,7 +890,7 @@
             token: state.visitToken
           });
         }
-        window.open(state.teamsUrl, '_blank', 'noopener,noreferrer');
+        window.open(url, '_blank', 'noopener,noreferrer');
       });
     });
 

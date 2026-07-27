@@ -98,11 +98,12 @@ function alf_format_wait_time( $checked_in_at ) {
  */
 function alf_queue_status_label( $status ) {
 	$labels = array(
-		'waiting'    => __( 'Waiting', 'access-law-firm' ),
-		'ready'      => __( 'Ready', 'access-law-firm' ),
-		'in_meeting' => __( 'In meeting', 'access-law-firm' ),
-		'completed'  => __( 'Completed', 'access-law-firm' ),
-		'dismissed'  => __( 'Dismissed', 'access-law-firm' ),
+		'waiting'       => __( 'Waiting', 'access-law-firm' ),
+		'ready'         => __( 'Ready', 'access-law-firm' ),
+		'in_meeting'    => __( 'In reception', 'access-law-firm' ),
+		'with_attorney' => __( 'With attorney', 'access-law-firm' ),
+		'completed'     => __( 'Completed', 'access-law-firm' ),
+		'dismissed'     => __( 'Dismissed', 'access-law-firm' ),
 	);
 	return isset( $labels[ $status ] ) ? $labels[ $status ] : $status;
 }
@@ -245,12 +246,15 @@ function alf_ajax_visit_status() {
 		'status_label' => alf_queue_status_label( $status ? $status : 'waiting' ),
 		'position'     => (int) $position,
 		'teams_url'    => '',
+		'phase'        => 'waiting',
 	);
 
 	if ( in_array( $status, array( 'ready', 'in_meeting' ), true ) ) {
-		// Return the stored URL as-is (already sanitized on save). A second
-		// esc_url_raw() can blank long Microsoft Teams join links.
 		$payload['teams_url'] = alf_teams_meeting_url();
+		$payload['phase']     = 'reception';
+	} elseif ( 'with_attorney' === $status ) {
+		$payload['teams_url'] = function_exists( 'alf_teams_attorney_url' ) ? alf_teams_attorney_url() : '';
+		$payload['phase']     = 'attorney';
 	}
 
 	wp_send_json_success( $payload );
@@ -275,9 +279,13 @@ function alf_ajax_visit_joined() {
 	$status = get_post_meta( $visit_id, 'queue_status', true );
 	if ( 'ready' === $status ) {
 		update_post_meta( $visit_id, 'queue_status', 'in_meeting' );
+		wp_send_json_success( array( 'status' => 'in_meeting' ) );
+	}
+	if ( 'with_attorney' === $status ) {
+		wp_send_json_success( array( 'status' => 'with_attorney' ) );
 	}
 
-	wp_send_json_success( array( 'status' => 'in_meeting' ) );
+	wp_send_json_success( array( 'status' => $status ? $status : 'waiting' ) );
 }
 add_action( 'wp_ajax_alf_visit_joined', 'alf_ajax_visit_joined' );
 add_action( 'wp_ajax_nopriv_alf_visit_joined', 'alf_ajax_visit_joined' );
@@ -309,7 +317,7 @@ function alf_ajax_queue_list() {
 			'meta_query'     => array(
 				array(
 					'key'     => 'queue_status',
-					'value'   => array( 'waiting', 'ready', 'in_meeting' ),
+					'value'   => array( 'waiting', 'ready', 'in_meeting', 'with_attorney' ),
 					'compare' => 'IN',
 				),
 			),
@@ -368,6 +376,7 @@ function alf_ajax_queue_update() {
 
 	$map = array(
 		'ready'    => 'ready',
+		'transfer' => 'with_attorney',
 		'complete' => 'completed',
 		'dismiss'  => 'dismissed',
 	);
@@ -376,11 +385,27 @@ function alf_ajax_queue_update() {
 		wp_send_json_error( array( 'message' => __( 'Unknown action.', 'access-law-firm' ) ), 400 );
 	}
 
+	$current = get_post_meta( $visit_id, 'queue_status', true );
+
 	if ( 'ready' === $action ) {
 		if ( ! alf_teams_meeting_url() ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'Set a Teams meeting URL under Virtual Lobby → Settings before marking Ready.', 'access-law-firm' ),
+					'message' => __( 'Set the Reception Teams URL under Virtual Lobby → Settings before marking Ready.', 'access-law-firm' ),
+				),
+				400
+			);
+		}
+	}
+
+	if ( 'transfer' === $action ) {
+		if ( ! in_array( $current, array( 'ready', 'in_meeting' ), true ) ) {
+			wp_send_json_error( array( 'message' => __( 'Transfer is only available after Ready / reception.', 'access-law-firm' ) ), 400 );
+		}
+		if ( ! function_exists( 'alf_teams_attorney_url' ) || ! alf_teams_attorney_url() ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Set the Attorney Teams URL under Virtual Lobby → Settings before transferring.', 'access-law-firm' ),
 				),
 				400
 			);
@@ -392,6 +417,9 @@ function alf_ajax_queue_update() {
 
 	if ( 'ready' === $new_status ) {
 		update_post_meta( $visit_id, 'ready_at', current_time( 'mysql' ) );
+	}
+	if ( 'with_attorney' === $new_status ) {
+		update_post_meta( $visit_id, 'transferred_at', current_time( 'mysql' ) );
 	}
 
 	wp_send_json_success(

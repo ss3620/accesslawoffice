@@ -81,7 +81,7 @@ function alf_sanitize_teams_url( $url ) {
 }
 
 /**
- * Get / set Teams meeting URL (dedicated option for reliable saves).
+ * Get / set Teams reception meeting URL (dedicated option for reliable saves).
  *
  * @param string|null $new_url Optional new value to save.
  * @return string
@@ -104,6 +104,33 @@ function alf_teams_meeting_url( $new_url = null ) {
 	$legacy = (string) alf_get_setting( 'teams_meeting_url', '' );
 	if ( '' !== $legacy ) {
 		update_option( 'alf_teams_meeting_url', $legacy, true );
+	}
+	return $legacy;
+}
+
+/**
+ * Get / set Teams attorney meeting URL.
+ *
+ * @param string|null $new_url Optional new value to save.
+ * @return string
+ */
+function alf_teams_attorney_url( $new_url = null ) {
+	if ( null !== $new_url ) {
+		$clean = alf_sanitize_teams_url( $new_url );
+		update_option( 'alf_teams_attorney_url', $clean, true );
+		alf_update_setting( 'teams_attorney_url', $clean );
+		wp_cache_delete( 'alf_teams_attorney_url', 'options' );
+		return $clean;
+	}
+
+	$stored = get_option( 'alf_teams_attorney_url', '__missing__' );
+	if ( '__missing__' !== $stored ) {
+		return (string) $stored;
+	}
+
+	$legacy = (string) alf_get_setting( 'teams_attorney_url', '' );
+	if ( '' !== $legacy ) {
+		update_option( 'alf_teams_attorney_url', $legacy, true );
 	}
 	return $legacy;
 }
