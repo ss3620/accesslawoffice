@@ -10,13 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ALF_THEME_VERSION', '1.3.4' );
+define( 'ALF_THEME_VERSION', '1.3.5' );
 
 require_once get_template_directory() . '/inc/settings.php';
 require_once get_template_directory() . '/inc/twilio-otp.php';
 require_once get_template_directory() . '/inc/captcha.php';
 require_once get_template_directory() . '/inc/lobby-admin.php';
 require_once get_template_directory() . '/inc/lobby-visits.php';
+require_once get_template_directory() . '/inc/elementor-home.php';
 
 /**
  * Theme setup.

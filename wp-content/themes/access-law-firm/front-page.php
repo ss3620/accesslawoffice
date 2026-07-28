@@ -2,8 +2,36 @@
 /**
  * Front page template — Access Law Firm landing.
  *
+ * If Settings → Reading uses an Elementor-built static page, render that
+ * page (theme header/footer/lobby still apply). Otherwise use the PHP home.
+ *
  * @package Access_Law_Firm
  */
+
+if ( function_exists( 'alf_use_elementor_front' ) && alf_use_elementor_front() ) {
+	$front_id = (int) get_option( 'page_on_front' );
+	query_posts(
+		array(
+			'page_id'     => $front_id,
+			'post_type'   => 'page',
+			'post_status' => 'publish',
+		)
+	);
+	get_header();
+	?>
+	<main id="home" class="alf-page alf-elementor-front">
+		<?php
+		while ( have_posts() ) :
+			the_post();
+			the_content();
+		endwhile;
+		?>
+	</main>
+	<?php
+	get_footer();
+	wp_reset_query();
+	return;
+}
 
 get_header();
 ?>
