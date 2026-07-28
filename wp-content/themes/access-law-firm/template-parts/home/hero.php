@@ -1,0 +1,142 @@
+<?php
+/**
+ * Home section: Hero + credential flip cards.
+ *
+ * @package Access_Law_Firm
+ */
+?>
+<section class="hero">
+	<div class="container">
+		<div class="hero-grid">
+			<div class="hero-copy">
+				<div class="eyebrow">Former Immigration Judge</div>
+				<h1>Experience From Every Side of the <span>Immigration System.</span></h1>
+				<p>Strategic, compassionate representation informed by federal service as an Immigration Judge, Asylum Officer, and USCIS Immigration Officer.</p>
+				<div class="actions">
+					<button class="btn btn-primary open-lobby" type="button">Join Virtual Lobby</button>
+				</div>
+			</div>
+			<?php $alf_lobby_open = alf_is_lobby_open(); ?>
+			<div class="portrait">
+				<img src="<?php echo alf_img( 'stock-attorney.png' ); ?>" alt="Attorney portrait">
+				<div id="alfHeroAvailability" class="availability<?php echo $alf_lobby_open ? '' : ' availability-closed'; ?>" data-lobby-availability>
+					<div data-lobby-avail-open <?php echo $alf_lobby_open ? '' : 'hidden'; ?>>
+						<strong>Virtual Lobby Open</strong>
+						<span>Live assistant available</span><br>
+						<small>● Live receptionist available</small>
+					</div>
+					<div data-lobby-avail-closed <?php echo $alf_lobby_open ? 'hidden' : ''; ?>>
+						<strong>Virtual Lobby Closed</strong>
+						<span>We are currently offline</span><br>
+						<small>Please check back during lobby hours.</small>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="credstrip flip-strip" aria-label="Professional experience">
+			<button class="flip-card" type="button" aria-pressed="false">
+				<span class="flip-card-inner">
+					<span class="flip-card-face flip-card-front">
+						<span class="icon icon-svg" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M12 3v17"/>
+								<path d="M6 6h12"/>
+								<path d="m6 6-3 6h6L6 6Z"/>
+								<path d="m18 6-3 6h6l-3-6Z"/>
+								<path d="M8 21h8"/>
+							</svg>
+						</span>
+						<span class="credential-copy">
+							<b>Former Immigration Judge</b>
+							<span>Immigration Court</span>
+						</span>
+					</span>
+					<span class="flip-card-face flip-card-back">
+						<b>Immigration Judge Experience</b>
+						<span>Decided immigration cases</span>
+						<span>Conducted bond hearings</span>
+						<span>Issued oral and written decisions</span>
+					</span>
+				</span>
+			</button>
+
+			<button class="flip-card" type="button" aria-pressed="false">
+				<span class="flip-card-inner">
+					<span class="flip-card-face flip-card-front">
+						<span class="icon icon-svg" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="12" r="9"/>
+								<path d="M3 12h18"/>
+								<path d="M12 3c2.6 2.4 4 5.4 4 9s-1.4 6.6-4 9"/>
+								<path d="M12 3c-2.6 2.4-4 5.4-4 9s1.4 6.6 4 9"/>
+							</svg>
+						</span>
+						<span class="credential-copy">
+							<b>Former Asylum Officer</b>
+							<span>U.S. Department of Homeland Security</span>
+						</span>
+					</span>
+					<span class="flip-card-face flip-card-back">
+						<b>Asylum Officer Experience</b>
+						<span>Interviewed asylum applicants</span>
+						<span>Evaluated credibility and evidence</span>
+						<span>Assessed eligibility for protection</span>
+					</span>
+				</span>
+			</button>
+
+			<button class="flip-card" type="button" aria-pressed="false">
+				<span class="flip-card-inner">
+					<span class="flip-card-face flip-card-front">
+						<span class="icon icon-svg" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+								<rect x="5" y="3" width="14" height="18" rx="2"/>
+								<path d="M9 3v18"/>
+								<circle cx="14" cy="11" r="3"/>
+								<path d="M11 11h6"/>
+								<path d="M14 8c.8.9 1.2 1.9 1.2 3s-.4 2.1-1.2 3"/>
+								<path d="M14 8c-.8.9-1.2 1.9-1.2 3s.4 2.1 1.2 3"/>
+							</svg>
+						</span>
+						<span class="credential-copy">
+							<b>Former Immigration Officer</b>
+							<span>U.S. Citizenship and Immigration Services</span>
+						</span>
+					</span>
+					<span class="flip-card-face flip-card-back">
+						<b>Immigration Officer Experience</b>
+						<span>Reviewed immigration applications and petitions</span>
+						<span>Conducted applicant interviews</span>
+						<span>Determined eligibility under immigration law</span>
+					</span>
+				</span>
+			</button>
+
+			<button class="flip-card" type="button" aria-pressed="false">
+				<span class="flip-card-inner">
+					<span class="flip-card-face flip-card-front">
+						<span class="icon icon-svg" aria-hidden="true">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+								<circle cx="12" cy="7" r="3"/>
+								<path d="M6.5 20v-2.5A4.5 4.5 0 0 1 11 13h2a4.5 4.5 0 0 1 4.5 4.5V20"/>
+								<path d="M4 11h3"/>
+								<path d="M17 11h3"/>
+							</svg>
+						</span>
+						<span class="credential-copy">
+							<b>Former Supervisory Immigration Services Officer</b>
+							<span>U.S. Citizenship and Immigration Services</span>
+						</span>
+					</span>
+					<span class="flip-card-face flip-card-back">
+						<b>Supervisory USCIS Experience</b>
+						<span>Supervised immigration officers</span>
+						<span>Reviewed complex immigration matters</span>
+						<span>Oversaw USCIS adjudications</span>
+					</span>
+				</span>
+			</button>
+		</div>
+	</div>
+</section>
