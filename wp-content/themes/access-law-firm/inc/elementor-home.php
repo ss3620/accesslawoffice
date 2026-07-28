@@ -379,6 +379,7 @@ function alf_elementor_home_document_data() {
 								'background_color' => '#c9922f',
 								'button_text_color'=> '#082c62',
 								'css_classes'      => 'open-lobby',
+								'_css_classes'     => 'open-lobby',
 							),
 							'elements'   => array(),
 						),

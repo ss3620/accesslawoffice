@@ -1813,3 +1813,14 @@ body.lobby-open {
     gap: 2px;
   }
 }
+
+/* Elementor page content (theme header/footer remain) */
+.alf-page {
+  min-height: 40vh;
+}
+
+.alf-page .elementor-widget-button .open-lobby,
+.alf-page a.open-lobby,
+.alf-page .open-lobby a {
+  cursor: pointer;
+}

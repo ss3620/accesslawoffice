@@ -10,27 +10,23 @@
 
 if ( function_exists( 'alf_use_elementor_front' ) && alf_use_elementor_front() ) {
 	$front_id = (int) get_option( 'page_on_front' );
-	query_posts(
-		array(
-			'page_id'     => $front_id,
-			'post_type'   => 'page',
-			'post_status' => 'publish',
-		)
-	);
-	get_header();
-	?>
-	<main id="home" class="alf-page alf-elementor-front">
-		<?php
-		while ( have_posts() ) :
-			the_post();
-			the_content();
-		endwhile;
+	$front    = get_post( $front_id );
+	if ( $front instanceof WP_Post ) {
+		$GLOBALS['post'] = $front;
+		setup_postdata( $front );
+		get_header();
 		?>
-	</main>
-	<?php
-	get_footer();
-	wp_reset_query();
-	return;
+		<main id="home" class="alf-page alf-elementor-front">
+			<?php
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Elementor renders via the_content filters.
+			echo apply_filters( 'the_content', $front->post_content );
+			?>
+		</main>
+		<?php
+		get_footer();
+		wp_reset_postdata();
+		return;
+	}
 }
 
 get_header();
