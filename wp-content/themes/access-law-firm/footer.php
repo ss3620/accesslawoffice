@@ -86,11 +86,11 @@
 			</div>
 
 			<details class="lobby-next-details">
-				<summary>What happens next (inside Microsoft Teams)</summary>
+				<summary>What happens next (inside Zoom)</summary>
 				<ol class="lobby-next-list">
 					<li>
 						<strong>Join Reception</strong>
-						<span>You’ll join a secure Microsoft Teams meeting with our receptionist. On a phone or tablet, install Teams first if needed.</span>
+						<span>You’ll join a secure Zoom meeting with our receptionist. On a phone or tablet, install Zoom first if needed.</span>
 					</li>
 					<li>
 						<strong>Receptionist Greets You</strong>
@@ -98,7 +98,7 @@
 					</li>
 					<li>
 						<strong>Join Attorney</strong>
-						<span>After intake, you’ll be transferred and join a separate Teams meeting with the attorney.</span>
+						<span>After intake, you’ll be transferred and join a separate Zoom meeting with the attorney (Waiting Room may apply).</span>
 					</li>
 					<li>
 						<strong>Consultation</strong>
@@ -325,7 +325,7 @@
 			</div>
 			<h3 class="lobby-step-title">Your Receptionist Is Ready</h3>
 			<p class="lobby-step-desc">A member of our team is ready to assist you. Click below to join your secure video reception.</p>
-			<p class="phone-info" style="margin:0 0 14px;text-align:center;">On a phone or tablet, install <strong>Microsoft Teams</strong> first if you don’t already have it, then tap Join Reception.</p>
+			<p class="phone-info" style="margin:0 0 14px;text-align:center;">On a phone or tablet, install the <strong>Zoom</strong> app first if you don’t already have it, then tap Join Reception.</p>
 			<div class="lobby-actions">
 				<button class="btn btn-gold" type="button" data-lobby-join="reception">
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
@@ -334,7 +334,7 @@
 			</div>
 			<div class="lobby-error" id="lobbyJoinError" data-error-for="join">Meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.</div>
 			<p class="note" id="lobbyReceptionNote" style="text-align:center;margin-top:12px">Stay on this page after joining. When intake is done, you’ll be asked to join the attorney.</p>
-			<p class="lobby-powered">Powered by Microsoft Teams</p>
+			<p class="lobby-powered">Powered by Zoom</p>
 		</div>
 
 		<!-- Step 7: Attorney ready -->
@@ -346,8 +346,8 @@
 				</svg>
 			</div>
 			<h3 class="lobby-step-title">Your Attorney Is Ready</h3>
-			<p class="lobby-step-desc">Reception has finished intake. Leave the reception meeting if you are still in it, then join your attorney below.</p>
-			<p class="phone-info" style="margin:0 0 14px;text-align:center;">On a phone or tablet, use the Microsoft Teams app to join.</p>
+			<p class="lobby-step-desc">Reception has finished intake. Leave the reception Zoom meeting if you are still in it, then join your attorney below. You may wait briefly in the Zoom Waiting Room until the attorney admits you.</p>
+			<p class="phone-info" style="margin:0 0 14px;text-align:center;">On a phone or tablet, use the Zoom app to join.</p>
 			<div class="lobby-actions">
 				<button class="btn btn-gold" type="button" data-lobby-join="attorney">
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
@@ -355,7 +355,7 @@
 				</button>
 			</div>
 			<div class="lobby-error" id="lobbyAttorneyJoinError" data-error-for="join-attorney">Attorney meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.</div>
-			<p class="lobby-powered">Powered by Microsoft Teams</p>
+			<p class="lobby-powered">Powered by Zoom</p>
 		</div>
 	</div>
 </div>

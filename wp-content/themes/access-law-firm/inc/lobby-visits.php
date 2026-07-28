@@ -263,7 +263,7 @@ add_action( 'wp_ajax_alf_visit_status', 'alf_ajax_visit_status' );
 add_action( 'wp_ajax_nopriv_alf_visit_status', 'alf_ajax_visit_status' );
 
 /**
- * Public AJAX: client opened Teams link — mark in_meeting.
+ * Public AJAX: client opened Zoom link — mark in_meeting.
  */
 function alf_ajax_visit_joined() {
 	check_ajax_referer( 'alf_lobby', 'nonce' );
@@ -391,7 +391,7 @@ function alf_ajax_queue_update() {
 		if ( ! alf_teams_meeting_url() ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'Set the Reception Teams URL under Virtual Lobby → Settings before marking Ready.', 'access-law-firm' ),
+					'message' => __( 'Set the Reception Zoom URL under Virtual Lobby → Settings before marking Ready.', 'access-law-firm' ),
 				),
 				400
 			);
@@ -405,7 +405,7 @@ function alf_ajax_queue_update() {
 		if ( ! function_exists( 'alf_teams_attorney_url' ) || ! alf_teams_attorney_url() ) {
 			wp_send_json_error(
 				array(
-					'message' => __( 'Set the Attorney Teams URL under Virtual Lobby → Settings before transferring.', 'access-law-firm' ),
+					'message' => __( 'Set the Attorney Zoom URL under Virtual Lobby → Settings before transferring.', 'access-law-firm' ),
 				),
 				400
 			);

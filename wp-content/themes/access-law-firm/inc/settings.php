@@ -53,9 +53,9 @@ function alf_update_setting( $key, $value ) {
 }
 
 /**
- * Sanitize a Microsoft Teams meeting join URL.
+ * Sanitize a video meeting join URL (Zoom / Teams).
  *
- * Teams links often include characters that strict HTML5 url inputs reject.
+ * Join links often include characters that strict HTML5 url inputs reject.
  *
  * @param string $url Raw URL.
  * @return string
@@ -81,7 +81,7 @@ function alf_sanitize_teams_url( $url ) {
 }
 
 /**
- * Get / set Teams reception meeting URL (dedicated option for reliable saves).
+ * Get / set reception meeting URL (Zoom). Storage keys kept for compatibility.
  *
  * @param string|null $new_url Optional new value to save.
  * @return string
@@ -109,7 +109,7 @@ function alf_teams_meeting_url( $new_url = null ) {
 }
 
 /**
- * Get / set Teams attorney meeting URL.
+ * Get / set attorney meeting URL (Zoom). Storage keys kept for compatibility.
  *
  * @param string|null $new_url Optional new value to save.
  * @return string

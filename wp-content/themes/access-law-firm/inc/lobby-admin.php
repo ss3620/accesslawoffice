@@ -285,7 +285,7 @@ function alf_create_receptionist_user() {
 }
 
 /**
- * Render lobby settings (Teams URL + create receptionist) — Administrators only.
+ * Render lobby settings (Zoom meeting URLs + create receptionist) — Administrators only.
  */
 function alf_render_lobby_settings_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -301,14 +301,14 @@ function alf_render_lobby_settings_page() {
 		$ok = true;
 		if ( '' !== trim( (string) $reception_raw ) && '' === $reception ) {
 			$ok = false;
-			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Reception Teams link did not look valid. Paste the full https:// join URL.', 'access-law-firm' ) . '</p></div>';
+			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Reception Zoom link did not look valid. Paste the full https:// join URL.', 'access-law-firm' ) . '</p></div>';
 		}
 		if ( '' !== trim( (string) $attorney_raw ) && '' === $attorney ) {
 			$ok = false;
-			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Attorney Teams link did not look valid. Paste the full https:// join URL.', 'access-law-firm' ) . '</p></div>';
+			echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'Attorney Zoom link did not look valid. Paste the full https:// join URL.', 'access-law-firm' ) . '</p></div>';
 		}
 		if ( $ok ) {
-			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Lobby meeting links saved.', 'access-law-firm' ) . '</p></div>';
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Lobby Zoom meeting links saved.', 'access-law-firm' ) . '</p></div>';
 		}
 	}
 
@@ -339,17 +339,17 @@ function alf_render_lobby_settings_page() {
 			<?php wp_nonce_field( 'alf_lobby_settings', 'alf_lobby_settings_nonce' ); ?>
 			<table class="form-table" role="presentation">
 				<tr>
-					<th scope="row"><label for="teams_meeting_url"><?php esc_html_e( 'Reception Teams meeting URL', 'access-law-firm' ); ?></label></th>
+					<th scope="row"><label for="teams_meeting_url"><?php esc_html_e( 'Reception Zoom meeting URL', 'access-law-firm' ); ?></label></th>
 					<td>
-						<input type="text" class="large-text" id="teams_meeting_url" name="teams_meeting_url" value="<?php echo esc_attr( $teams_url ); ?>" placeholder="https://teams.microsoft.com/l/meetup-join/..." autocomplete="off" spellcheck="false">
-						<p class="description"><?php esc_html_e( 'Clients join this meeting when the receptionist clicks Ready. Create a standing “Virtual Reception” meeting in Teams and paste the join link.', 'access-law-firm' ); ?></p>
+						<input type="text" class="large-text" id="teams_meeting_url" name="teams_meeting_url" value="<?php echo esc_attr( $teams_url ); ?>" placeholder="https://zoom.us/j/..." autocomplete="off" spellcheck="false">
+						<p class="description"><?php esc_html_e( 'Clients join this meeting when the receptionist clicks Ready. Create a recurring Zoom meeting for reception (Waiting Room recommended) and paste the join link.', 'access-law-firm' ); ?></p>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="teams_attorney_url"><?php esc_html_e( 'Attorney Teams meeting URL', 'access-law-firm' ); ?></label></th>
+					<th scope="row"><label for="teams_attorney_url"><?php esc_html_e( 'Attorney Zoom meeting URL', 'access-law-firm' ); ?></label></th>
 					<td>
-						<input type="text" class="large-text" id="teams_attorney_url" name="teams_attorney_url" value="<?php echo esc_attr( $attorney_url ); ?>" placeholder="https://teams.microsoft.com/l/meetup-join/..." autocomplete="off" spellcheck="false">
-						<p class="description"><?php esc_html_e( 'After intake, click Transfer to Attorney in the queue. The client’s screen shows Join Attorney with this link. Use a separate standing attorney meeting.', 'access-law-firm' ); ?></p>
+						<input type="text" class="large-text" id="teams_attorney_url" name="teams_attorney_url" value="<?php echo esc_attr( $attorney_url ); ?>" placeholder="https://zoom.us/j/..." autocomplete="off" spellcheck="false">
+						<p class="description"><?php esc_html_e( 'After intake, click Transfer to Attorney in the queue. The client’s screen shows Join Attorney with this link. Use a separate attorney Zoom meeting with Waiting Room so you can admit when ready.', 'access-law-firm' ); ?></p>
 					</td>
 				</tr>
 			</table>
@@ -430,16 +430,16 @@ function alf_render_lobby_queue_page() {
 				<?php
 				printf(
 					/* translators: %s: settings page URL */
-					esc_html__( 'Save both Reception and Attorney Teams meeting URLs under %s so Ready and Transfer work.', 'access-law-firm' ),
+					esc_html__( 'Save both Reception and Attorney Zoom meeting URLs under %s so Ready and Transfer work.', 'access-law-firm' ),
 					'<a href="' . esc_url( admin_url( 'admin.php?page=alf-lobby-settings' ) ) . '">' . esc_html__( 'Virtual Lobby → Settings', 'access-law-firm' ) . '</a>'
 				);
 				?>
 			</p></div>
 		<?php elseif ( ! $teams_url || ! $attorney_url ) : ?>
-			<div class="notice notice-warning"><p><?php esc_html_e( 'Reception and/or Attorney Teams meeting URL is not configured yet. Ask an administrator to add them under Virtual Lobby → Settings.', 'access-law-firm' ); ?></p></div>
+			<div class="notice notice-warning"><p><?php esc_html_e( 'Reception and/or Attorney Zoom meeting URL is not configured yet. Ask an administrator to add them under Virtual Lobby → Settings.', 'access-law-firm' ); ?></p></div>
 		<?php endif; ?>
 
-		<p class="description"><?php esc_html_e( 'Queue refreshes automatically. Ready → client joins Reception. After intake, Transfer to Attorney → client sees Join Attorney.', 'access-law-firm' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Queue refreshes automatically. Ready → client joins Reception Zoom. After intake, Transfer to Attorney → client sees Join Attorney.', 'access-law-firm' ); ?></p>
 
 		<table class="wp-list-table widefat fixed striped" id="alf-queue-table">
 			<thead>

@@ -547,7 +547,7 @@
             if (state.attorneyUrl) {
               attErr.classList.remove('show');
             } else {
-              attErr.textContent = 'Attorney meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
+              attErr.textContent = 'Attorney Zoom link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
               attErr.classList.add('show');
             }
           }
@@ -562,7 +562,7 @@
             if (state.teamsUrl) {
               joinErr.classList.remove('show');
             } else {
-              joinErr.textContent = 'Meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
+              joinErr.textContent = 'Reception Zoom link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
               joinErr.classList.add('show');
             }
           }
@@ -866,7 +866,7 @@
       });
     });
 
-    // Join Reception / Join Attorney — open Teams meeting
+    // Join Reception / Join Attorney — open Zoom meeting
     modal.querySelectorAll('[data-lobby-join]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var kind = btn.getAttribute('data-lobby-join') || 'reception';
@@ -876,8 +876,8 @@
         if (!url) {
           if (joinErr) {
             joinErr.textContent = kind === 'attorney'
-              ? 'Attorney meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.'
-              : 'Meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
+              ? 'Attorney Zoom link is not available. Ask the receptionist to check Virtual Lobby → Settings.'
+              : 'Reception Zoom link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
             joinErr.classList.add('show');
           }
           pollVisitStatus();
