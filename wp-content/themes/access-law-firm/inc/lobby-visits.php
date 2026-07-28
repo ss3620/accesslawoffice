@@ -245,16 +245,16 @@ function alf_ajax_visit_status() {
 		'status'       => $status ? $status : 'waiting',
 		'status_label' => alf_queue_status_label( $status ? $status : 'waiting' ),
 		'position'     => (int) $position,
-		'teams_url'    => '',
+		'zoom_url'     => '',
 		'phase'        => 'waiting',
 	);
 
 	if ( in_array( $status, array( 'ready', 'in_meeting' ), true ) ) {
-		$payload['teams_url'] = alf_teams_meeting_url();
-		$payload['phase']     = 'reception';
+		$payload['zoom_url'] = alf_zoom_meeting_url();
+		$payload['phase']    = 'reception';
 	} elseif ( 'with_attorney' === $status ) {
-		$payload['teams_url'] = function_exists( 'alf_teams_attorney_url' ) ? alf_teams_attorney_url() : '';
-		$payload['phase']     = 'attorney';
+		$payload['zoom_url'] = alf_zoom_attorney_url();
+		$payload['phase']    = 'attorney';
 	}
 
 	wp_send_json_success( $payload );
@@ -388,7 +388,7 @@ function alf_ajax_queue_update() {
 	$current = get_post_meta( $visit_id, 'queue_status', true );
 
 	if ( 'ready' === $action ) {
-		if ( ! alf_teams_meeting_url() ) {
+		if ( ! alf_zoom_meeting_url() ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'Set the Reception Zoom URL under Virtual Lobby → Settings before marking Ready.', 'access-law-firm' ),
@@ -402,7 +402,7 @@ function alf_ajax_queue_update() {
 		if ( ! in_array( $current, array( 'ready', 'in_meeting' ), true ) ) {
 			wp_send_json_error( array( 'message' => __( 'Transfer is only available after Ready / reception.', 'access-law-firm' ) ), 400 );
 		}
-		if ( ! function_exists( 'alf_teams_attorney_url' ) || ! alf_teams_attorney_url() ) {
+		if ( ! alf_zoom_attorney_url() ) {
 			wp_send_json_error(
 				array(
 					'message' => __( 'Set the Attorney Zoom URL under Virtual Lobby → Settings before transferring.', 'access-law-firm' ),

@@ -222,7 +222,7 @@
       verifyToken: '',
       visitId: 0,
       visitToken: '',
-      teamsUrl: '',
+      receptionUrl: '',
       attorneyUrl: ''
     };
     var pollTimer = null;
@@ -384,7 +384,7 @@
       modal.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('lobby-open');
       // Reset for next visit
-      state = { name: '', phone: '', rawPhone: '', country: '+1', otp: '', matter: '', verifyToken: '', visitId: 0, visitToken: '', teamsUrl: '', attorneyUrl: '' };
+      state = { name: '', phone: '', rawPhone: '', country: '+1', otp: '', matter: '', verifyToken: '', visitId: 0, visitToken: '', receptionUrl: '', attorneyUrl: '' };
       selectedMatter = '';
       captchaDone = false;
       verifyPhase = captchaEnabled ? 'captcha' : 'otp';
@@ -540,7 +540,7 @@
         }
 
         if (data.status === 'with_attorney' || data.phase === 'attorney') {
-          state.attorneyUrl = data.teams_url || '';
+          state.attorneyUrl = data.zoom_url || data.teams_url || '';
           showStep(7);
           var attErr = document.getElementById('lobbyAttorneyJoinError');
           if (attErr) {
@@ -553,13 +553,13 @@
           }
           // Keep polling lightly so Complete/Dismiss still updates; stop only on terminal states.
         } else if (data.status === 'ready' || data.status === 'in_meeting' || data.phase === 'reception') {
-          state.teamsUrl = data.teams_url || '';
+          state.receptionUrl = data.zoom_url || data.teams_url || '';
           if (currentStep === 5 || currentStep === 6) {
             showStep(6);
           }
           var joinErr = document.getElementById('lobbyJoinError');
           if (joinErr) {
-            if (state.teamsUrl) {
+            if (state.receptionUrl) {
               joinErr.classList.remove('show');
             } else {
               joinErr.textContent = 'Reception Zoom link is not available. Ask the receptionist to check Virtual Lobby → Settings.';
@@ -870,7 +870,7 @@
     modal.querySelectorAll('[data-lobby-join]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var kind = btn.getAttribute('data-lobby-join') || 'reception';
-        var url = kind === 'attorney' ? state.attorneyUrl : state.teamsUrl;
+        var url = kind === 'attorney' ? state.attorneyUrl : state.receptionUrl;
         var errId = kind === 'attorney' ? 'lobbyAttorneyJoinError' : 'lobbyJoinError';
         var joinErr = document.getElementById(errId);
         if (!url) {

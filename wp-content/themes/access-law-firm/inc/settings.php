@@ -53,14 +53,14 @@ function alf_update_setting( $key, $value ) {
 }
 
 /**
- * Sanitize a video meeting join URL (Zoom / Teams).
+ * Sanitize a video meeting join URL (Zoom).
  *
  * Join links often include characters that strict HTML5 url inputs reject.
  *
  * @param string $url Raw URL.
  * @return string
  */
-function alf_sanitize_teams_url( $url ) {
+function alf_sanitize_meeting_url( $url ) {
 	$url = trim( (string) $url );
 	$url = preg_replace( '/\s+/', '', $url );
 	if ( '' === $url ) {
@@ -81,16 +81,25 @@ function alf_sanitize_teams_url( $url ) {
 }
 
 /**
- * Get / set reception meeting URL (Zoom). Storage keys kept for compatibility.
+ * @deprecated Use alf_sanitize_meeting_url().
+ * @param string $url Raw URL.
+ * @return string
+ */
+function alf_sanitize_teams_url( $url ) {
+	return alf_sanitize_meeting_url( $url );
+}
+
+/**
+ * Get / set reception Zoom meeting URL.
+ * Option keys remain alf_teams_* so previously saved links still load.
  *
  * @param string|null $new_url Optional new value to save.
  * @return string
  */
-function alf_teams_meeting_url( $new_url = null ) {
+function alf_zoom_meeting_url( $new_url = null ) {
 	if ( null !== $new_url ) {
-		$clean = alf_sanitize_teams_url( $new_url );
+		$clean = alf_sanitize_meeting_url( $new_url );
 		update_option( 'alf_teams_meeting_url', $clean, true );
-		// Keep legacy key in sync for older reads.
 		alf_update_setting( 'teams_meeting_url', $clean );
 		wp_cache_delete( 'alf_teams_meeting_url', 'options' );
 		return $clean;
@@ -109,14 +118,24 @@ function alf_teams_meeting_url( $new_url = null ) {
 }
 
 /**
- * Get / set attorney meeting URL (Zoom). Storage keys kept for compatibility.
+ * @deprecated Use alf_zoom_meeting_url().
+ * @param string|null $new_url Optional new value.
+ * @return string
+ */
+function alf_teams_meeting_url( $new_url = null ) {
+	return alf_zoom_meeting_url( $new_url );
+}
+
+/**
+ * Get / set attorney Zoom meeting URL.
+ * Option keys remain alf_teams_* so previously saved links still load.
  *
  * @param string|null $new_url Optional new value to save.
  * @return string
  */
-function alf_teams_attorney_url( $new_url = null ) {
+function alf_zoom_attorney_url( $new_url = null ) {
 	if ( null !== $new_url ) {
-		$clean = alf_sanitize_teams_url( $new_url );
+		$clean = alf_sanitize_meeting_url( $new_url );
 		update_option( 'alf_teams_attorney_url', $clean, true );
 		alf_update_setting( 'teams_attorney_url', $clean );
 		wp_cache_delete( 'alf_teams_attorney_url', 'options' );
@@ -133,6 +152,15 @@ function alf_teams_attorney_url( $new_url = null ) {
 		update_option( 'alf_teams_attorney_url', $legacy, true );
 	}
 	return $legacy;
+}
+
+/**
+ * @deprecated Use alf_zoom_attorney_url().
+ * @param string|null $new_url Optional new value.
+ * @return string
+ */
+function alf_teams_attorney_url( $new_url = null ) {
+	return alf_zoom_attorney_url( $new_url );
 }
 
 /**

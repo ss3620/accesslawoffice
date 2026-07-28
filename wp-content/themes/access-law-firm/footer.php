@@ -40,7 +40,9 @@
 		<?php $alf_lobby_open = alf_is_lobby_open(); ?>
 		<div class="lobby-step active" data-step="0">
 			<div class="lobby-welcome">
-				<div class="lobby-brand-mark" aria-hidden="true">A</div>
+				<div class="lobby-brand-mark" aria-hidden="true">
+					<img src="<?php echo alf_img( 'brand-mark.png' ); ?>" alt="" width="64" height="64" decoding="async">
+				</div>
 				<div class="eyebrow" style="color:#f0bd5d">Virtual Lobby Experience</div>
 
 				<div data-lobby-welcome-open <?php echo $alf_lobby_open ? '' : 'hidden'; ?>>

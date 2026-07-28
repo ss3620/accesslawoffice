@@ -293,10 +293,14 @@ function alf_render_lobby_settings_page() {
 	}
 
 	if ( isset( $_POST['alf_lobby_settings_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['alf_lobby_settings_nonce'] ) ), 'alf_lobby_settings' ) ) {
-		$reception_raw = isset( $_POST['teams_meeting_url'] ) ? wp_unslash( $_POST['teams_meeting_url'] ) : '';
-		$attorney_raw  = isset( $_POST['teams_attorney_url'] ) ? wp_unslash( $_POST['teams_attorney_url'] ) : '';
-		$reception     = alf_teams_meeting_url( $reception_raw );
-		$attorney      = alf_teams_attorney_url( $attorney_raw );
+		$reception_raw = isset( $_POST['zoom_meeting_url'] )
+			? wp_unslash( $_POST['zoom_meeting_url'] )
+			: ( isset( $_POST['teams_meeting_url'] ) ? wp_unslash( $_POST['teams_meeting_url'] ) : '' );
+		$attorney_raw  = isset( $_POST['zoom_attorney_url'] )
+			? wp_unslash( $_POST['zoom_attorney_url'] )
+			: ( isset( $_POST['teams_attorney_url'] ) ? wp_unslash( $_POST['teams_attorney_url'] ) : '' );
+		$reception     = alf_zoom_meeting_url( $reception_raw );
+		$attorney      = alf_zoom_attorney_url( $attorney_raw );
 
 		$ok = true;
 		if ( '' !== trim( (string) $reception_raw ) && '' === $reception ) {
@@ -328,8 +332,8 @@ function alf_render_lobby_settings_page() {
 		echo '</div>';
 	}
 
-	$teams_url        = alf_teams_meeting_url();
-	$attorney_url     = alf_teams_attorney_url();
+	$reception_url    = alf_zoom_meeting_url();
+	$attorney_url     = alf_zoom_attorney_url();
 	$existing_user    = get_user_by( 'login', 'receptionist' );
 	$has_receptionist = $existing_user && in_array( 'alf_receptionist', (array) $existing_user->roles, true );
 	?>
@@ -339,16 +343,16 @@ function alf_render_lobby_settings_page() {
 			<?php wp_nonce_field( 'alf_lobby_settings', 'alf_lobby_settings_nonce' ); ?>
 			<table class="form-table" role="presentation">
 				<tr>
-					<th scope="row"><label for="teams_meeting_url"><?php esc_html_e( 'Reception Zoom meeting URL', 'access-law-firm' ); ?></label></th>
+					<th scope="row"><label for="zoom_meeting_url"><?php esc_html_e( 'Reception Zoom meeting URL', 'access-law-firm' ); ?></label></th>
 					<td>
-						<input type="text" class="large-text" id="teams_meeting_url" name="teams_meeting_url" value="<?php echo esc_attr( $teams_url ); ?>" placeholder="https://zoom.us/j/..." autocomplete="off" spellcheck="false">
+						<input type="text" class="large-text" id="zoom_meeting_url" name="zoom_meeting_url" value="<?php echo esc_attr( $reception_url ); ?>" placeholder="https://zoom.us/j/..." autocomplete="off" spellcheck="false">
 						<p class="description"><?php esc_html_e( 'Clients join this meeting when the receptionist clicks Ready. Create a recurring Zoom meeting for reception (Waiting Room recommended) and paste the join link.', 'access-law-firm' ); ?></p>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="teams_attorney_url"><?php esc_html_e( 'Attorney Zoom meeting URL', 'access-law-firm' ); ?></label></th>
+					<th scope="row"><label for="zoom_attorney_url"><?php esc_html_e( 'Attorney Zoom meeting URL', 'access-law-firm' ); ?></label></th>
 					<td>
-						<input type="text" class="large-text" id="teams_attorney_url" name="teams_attorney_url" value="<?php echo esc_attr( $attorney_url ); ?>" placeholder="https://zoom.us/j/..." autocomplete="off" spellcheck="false">
+						<input type="text" class="large-text" id="zoom_attorney_url" name="zoom_attorney_url" value="<?php echo esc_attr( $attorney_url ); ?>" placeholder="https://zoom.us/j/..." autocomplete="off" spellcheck="false">
 						<p class="description"><?php esc_html_e( 'After intake, click Transfer to Attorney in the queue. The client’s screen shows Join Attorney with this link. Use a separate attorney Zoom meeting with Waiting Room so you can admit when ready.', 'access-law-firm' ); ?></p>
 					</td>
 				</tr>
@@ -396,8 +400,8 @@ function alf_render_lobby_queue_page() {
 	}
 
 	$is_open      = alf_is_lobby_open();
-	$teams_url    = alf_teams_meeting_url();
-	$attorney_url = alf_teams_attorney_url();
+	$reception_url = alf_zoom_meeting_url();
+	$attorney_url  = alf_zoom_attorney_url();
 
 	if ( isset( $_GET['alf_lobby_toggled'] ) ) {
 		$toggled_open = '1' === (string) wp_unslash( $_GET['alf_lobby_toggled'] );
@@ -425,7 +429,7 @@ function alf_render_lobby_queue_page() {
 			<?php alf_render_lobby_toggle_control( 'console' ); ?>
 		</div>
 
-		<?php if ( ( ! $teams_url || ! $attorney_url ) && current_user_can( 'manage_options' ) ) : ?>
+		<?php if ( ( ! $reception_url || ! $attorney_url ) && current_user_can( 'manage_options' ) ) : ?>
 			<div class="notice notice-warning"><p>
 				<?php
 				printf(
@@ -435,7 +439,7 @@ function alf_render_lobby_queue_page() {
 				);
 				?>
 			</p></div>
-		<?php elseif ( ! $teams_url || ! $attorney_url ) : ?>
+		<?php elseif ( ! $reception_url || ! $attorney_url ) : ?>
 			<div class="notice notice-warning"><p><?php esc_html_e( 'Reception and/or Attorney Zoom meeting URL is not configured yet. Ask an administrator to add them under Virtual Lobby → Settings.', 'access-law-firm' ); ?></p></div>
 		<?php endif; ?>
 

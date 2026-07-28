@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ALF_THEME_VERSION', '1.3.1' );
+define( 'ALF_THEME_VERSION', '1.3.3' );
 
 require_once get_template_directory() . '/inc/settings.php';
 require_once get_template_directory() . '/inc/twilio-otp.php';
