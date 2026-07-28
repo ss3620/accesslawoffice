@@ -33,7 +33,9 @@
 <!-- Virtual Lobby multi-step popup -->
 <div class="lobby-modal" id="lobbyModal" role="dialog" aria-modal="true" aria-labelledby="lobbyModalTitle" aria-hidden="true">
 	<div class="lobby-modal-card">
-		<button class="lobby-modal-close" type="button" aria-label="Close Virtual Lobby" data-lobby-close>&times;</button>
+		<div class="lobby-modal-topbar">
+			<button class="lobby-modal-close" type="button" aria-label="Close Virtual Lobby" data-lobby-close>&times;</button>
+		</div>
 		<div class="lobby-modal-scroll">
 
 		<!-- Step 0: Welcome -->

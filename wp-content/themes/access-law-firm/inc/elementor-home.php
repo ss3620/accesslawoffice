@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Bump to force re-seed of the Elementor home page content. */
-define( 'ALF_ELEMENTOR_HOME_SEED', 2 );
+define( 'ALF_ELEMENTOR_HOME_SEED', 3 );
 
 /**
  * Declare Elementor compatibility.
@@ -134,15 +134,26 @@ function alf_elementor_uid() {
  * @return array
  */
 function alf_elementor_shortcode_section( $label, $shortcode ) {
+	$zero = array(
+		'unit'     => 'px',
+		'top'      => '0',
+		'right'    => '0',
+		'bottom'   => '0',
+		'left'     => '0',
+		'isLinked' => true,
+	);
+
 	return array(
 		'id'       => alf_elementor_uid(),
 		'elType'   => 'section',
 		'settings' => array(
-			'layout'                => 'full_width',
-			'gap'                   => 'no',
-			'content_position'      => 'top',
-			'structure'             => '10',
-			'_title'                => $label,
+			'layout'           => 'full_width',
+			'gap'              => 'no',
+			'content_position' => 'top',
+			'structure'        => '10',
+			'_title'           => $label,
+			'padding'          => $zero,
+			'margin'           => $zero,
 		),
 		'elements' => array(
 			array(
@@ -151,6 +162,8 @@ function alf_elementor_shortcode_section( $label, $shortcode ) {
 				'settings' => array(
 					'_column_size' => 100,
 					'_inline_size' => null,
+					'padding'      => $zero,
+					'margin'       => $zero,
 				),
 				'elements' => array(
 					array(
@@ -159,6 +172,8 @@ function alf_elementor_shortcode_section( $label, $shortcode ) {
 						'widgetType' => 'shortcode',
 						'settings'   => array(
 							'shortcode' => $shortcode,
+							'_padding'  => $zero,
+							'_margin'   => $zero,
 						),
 						'elements'   => array(),
 					),
