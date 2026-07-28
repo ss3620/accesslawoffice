@@ -34,6 +34,7 @@
 <div class="lobby-modal" id="lobbyModal" role="dialog" aria-modal="true" aria-labelledby="lobbyModalTitle" aria-hidden="true">
 	<div class="lobby-modal-card">
 		<button class="lobby-modal-close" type="button" aria-label="Close Virtual Lobby" data-lobby-close>&times;</button>
+		<div class="lobby-modal-scroll">
 
 		<!-- Step 0: Welcome -->
 		<?php $alf_lobby_open = alf_is_lobby_open(); ?>
@@ -358,6 +359,7 @@
 			<div class="lobby-error" id="lobbyAttorneyJoinError" data-error-for="join-attorney">Attorney meeting link is not available. Ask the receptionist to check Virtual Lobby → Settings.</div>
 			<p class="lobby-powered">Powered by Zoom</p>
 		</div>
+		</div><!-- .lobby-modal-scroll -->
 	</div>
 </div>
 
