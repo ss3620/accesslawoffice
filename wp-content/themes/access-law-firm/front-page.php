@@ -18,7 +18,6 @@ get_header();
 					<p>Strategic, compassionate representation informed by federal service as an Immigration Judge, Asylum Officer, and USCIS Immigration Officer.</p>
 					<div class="actions">
 						<button class="btn btn-primary open-lobby" type="button">Join Virtual Lobby</button>
-						<a class="btn btn-secondary" href="tel:+17134892089" hidden aria-hidden="true" tabindex="-1">Call Now</a>
 					</div>
 				</div>
 				<?php $alf_lobby_open = alf_is_lobby_open(); ?>

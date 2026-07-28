@@ -1412,6 +1412,17 @@ select {
   margin-bottom: 20px;
 }
 
+.lobby-wait-instruction {
+  margin: -8px 0 20px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff8eb;
+  border: 1px solid #f0d9a8;
+  color: var(--navy);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
 .lobby-error {
   display: none;
   color: #b42318;

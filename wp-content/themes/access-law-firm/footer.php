@@ -14,11 +14,10 @@
 				<span>ACCESS<small style="color:#c6d5e8">LAW FIRM</small></span>
 			</div>
 			<p style="margin-top:15px">Former Immigration Judge. Experience, insight, and modern access.</p>
-			<p style="margin-top:12px;font-size:.76rem;color:#9fb3cf">Phase One design prototype — photographs are temporary placeholders.</p>
 		</div>
 		<div>
 			<b>Contact</b>
-			<p style="margin-top:10px">(713) 489-2089<br>info@accesslawfirm.com<br>Houston, Texas</p>
+			<p style="margin-top:10px">00000000<br>info@accesslawfirm.com<br>Houston, Texas</p>
 		</div>
 		<div>
 			<b>Quick Links</b>
@@ -70,7 +69,6 @@
 							<span>Sat–Sun</span><span>10:00 AM – 3:30 PM</span>
 						</div>
 					</div>
-					<a class="btn btn-secondary" href="tel:+17134892089" style="width:100%">Call the Office</a>
 				</div>
 			</div>
 
@@ -302,6 +300,7 @@
 			</div>
 			<h3 class="lobby-step-title">You're Checked In!</h3>
 			<p class="lobby-step-desc">Thank you. A receptionist will be with you shortly.</p>
+			<p class="lobby-step-desc lobby-wait-instruction">Do not close or refresh this page. A secure meeting link will appear here as soon as our receptionist is available to assist you.</p>
 			<div class="lobby-confirm-stats">
 				<div>
 					<strong>Status</strong>
