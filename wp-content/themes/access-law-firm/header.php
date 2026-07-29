@@ -35,7 +35,10 @@
 		<?php $alf_lobby_open = alf_is_lobby_open(); ?>
 		<div id="alfHeaderStatus" class="status<?php echo $alf_lobby_open ? '' : ' status-closed'; ?>" data-lobby-status>
 			<span class="dot" aria-hidden="true"></span>
-			<span data-lobby-status-label><?php echo $alf_lobby_open ? esc_html__( 'Virtual Lobby Open', 'access-law-firm' ) : esc_html__( 'Virtual Lobby Closed', 'access-law-firm' ); ?></span>
+			<span class="status-copy">
+				<span data-lobby-status-label><?php echo $alf_lobby_open ? esc_html__( 'Virtual Lobby Open', 'access-law-firm' ) : esc_html__( 'Virtual Lobby Closed', 'access-law-firm' ); ?></span>
+				<small class="status-hours">Mon–Fri 9:00 AM–5:00 PM · Sat–Sun 10:00 AM–3:30 PM CST</small>
+			</span>
 		</div>
 	</div>
 	<div class="header-accent" aria-hidden="true"></div>

@@ -46,10 +46,18 @@ $alf_lobby_open = alf_is_lobby_open();
 							</div>
 						</div>
 						<p class="lobby-card-foot"><span class="dot" aria-hidden="true"></span> Live receptionist available</p>
+						<p class="lobby-card-hours">
+							<span><b>Mon–Fri:</b> 9:00 AM–5:00 PM CST</span>
+							<span><b>Sat–Sun:</b> 10:00 AM–3:30 PM CST</span>
+						</p>
 					</div>
 					<div data-lobby-avail-closed <?php echo $alf_lobby_open ? 'hidden' : ''; ?>>
 						<strong class="lobby-card-title">Virtual Lobby Closed</strong>
-						<p class="lobby-card-offline">We are currently offline. Please check back during lobby hours.</p>
+						<p class="lobby-card-offline">We are currently offline. Please check back during lobby hours:</p>
+						<p class="lobby-card-hours lobby-card-hours--closed">
+							<span><b>Monday–Friday:</b> 9:00 AM–5:00 PM CST</span>
+							<span><b>Saturday–Sunday:</b> 10:00 AM–3:30 PM CST</span>
+						</p>
 						<p class="lobby-card-foot lobby-card-foot--closed"><span class="dot" aria-hidden="true"></span> Offline</p>
 					</div>
 				</div>
