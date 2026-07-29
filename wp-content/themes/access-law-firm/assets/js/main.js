@@ -31,6 +31,7 @@
 
       document.querySelectorAll('[data-lobby-availability]').forEach(function (el) {
         el.classList.toggle('availability-closed', !isOpen);
+        el.classList.toggle('lobby-card-closed', !isOpen);
         var openEl = el.querySelector('[data-lobby-avail-open]');
         var closedEl = el.querySelector('[data-lobby-avail-closed]');
         if (openEl) openEl.hidden = !isOpen;
@@ -136,8 +137,23 @@
   })();
 
   /* ------------------------------------------------------------------ */
-  /* Flip credential cards                                                */
+  /* Credential list rows                                                 */
   /* ------------------------------------------------------------------ */
+  document.querySelectorAll('.cred-row').forEach(function (row) {
+    row.addEventListener('click', function () {
+      var open = row.getAttribute('aria-expanded') === 'true';
+      document.querySelectorAll('.cred-row[aria-expanded="true"]').forEach(function (other) {
+        if (other !== row) {
+          other.setAttribute('aria-expanded', 'false');
+          other.classList.remove('is-open');
+        }
+      });
+      row.setAttribute('aria-expanded', open ? 'false' : 'true');
+      row.classList.toggle('is-open', !open);
+    });
+  });
+
+  /* Legacy flip cards (if present) */
   document.querySelectorAll('.flip-card').forEach(function (card) {
     card.addEventListener('click', function () {
       var next = !card.classList.contains('is-flipped');
