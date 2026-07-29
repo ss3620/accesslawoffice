@@ -17,7 +17,7 @@
 		</div>
 		<div>
 			<b>Contact</b>
-			<p style="margin-top:10px">00000000<br>info@accesslawfirm.com<br>Houston, Texas</p>
+			<p style="margin-top:10px">00000000<br>info@accesslawoffice.com<br>Houston, Texas</p>
 		</div>
 		<div>
 			<b>Quick Links</b>

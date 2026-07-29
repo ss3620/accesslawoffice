@@ -255,6 +255,10 @@ header.site-header {
   background: #f3f6fb;
 }
 
+.hero > .container {
+  display: block;
+}
+
 .hero-stage {
   position: relative;
   margin-bottom: 72px;
@@ -747,6 +751,108 @@ select {
   font-size: 0.78rem;
   color: var(--muted);
   margin-top: 12px;
+}
+
+/* Desktop layout — restore full-width / multi-column home */
+@media (min-width: 901px) {
+  .nav-toggle {
+    display: none !important;
+  }
+
+  .navlinks {
+    display: flex !important;
+    position: static;
+    flex-direction: row;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    width: auto;
+  }
+
+  .navlinks .btn {
+    width: auto;
+  }
+
+  .actions .btn {
+    width: auto;
+  }
+
+  .status {
+    max-width: none;
+    font-size: 0.85rem;
+    text-align: left;
+  }
+
+  .hero {
+    padding: 48px 0 64px;
+    background:
+      radial-gradient(circle at 80% 20%, rgba(201, 146, 47, 0.11), transparent 22%),
+      radial-gradient(circle at 68% 18%, rgba(13, 76, 163, 0.1), transparent 26%),
+      linear-gradient(#fff, #f3f6fb);
+  }
+
+  .hero > .container {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    grid-template-areas:
+      "intro stage"
+      "creds stage";
+    gap: 28px 48px;
+    align-items: start;
+  }
+
+  .hero-intro {
+    grid-area: intro;
+    margin-top: 8px;
+    max-width: none;
+  }
+
+  .hero-intro h1 {
+    font-size: clamp(2.4rem, 3.4vw, 3.2rem);
+  }
+
+  .hero-stage {
+    grid-area: stage;
+    margin-bottom: 48px;
+    position: sticky;
+    top: 100px;
+  }
+
+  .cred-list {
+    grid-area: creds;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .portrait {
+    min-height: 520px;
+    height: 560px;
+    border-radius: 32px;
+  }
+
+  .lobby-card {
+    width: min(calc(100% - 48px), 400px);
+    transform: translate(-50%, 36%);
+  }
+
+  .footer-grid {
+    grid-template-columns: 1.2fr 1fr 1fr;
+  }
+
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .steps {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .about-grid,
+  .faq-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 900px) {

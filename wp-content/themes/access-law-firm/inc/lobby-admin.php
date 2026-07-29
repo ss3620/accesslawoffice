@@ -233,7 +233,7 @@ function alf_create_receptionist_user() {
 	}
 
 	$login = 'receptionist';
-	$email = 'receptionist@accesslawfirm.com';
+	$email = 'receptionist@accesslawoffice.com';
 	$pass  = 'Reception@123';
 
 	if ( username_exists( $login ) || email_exists( $email ) ) {
