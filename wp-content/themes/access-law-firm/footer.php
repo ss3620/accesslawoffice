@@ -66,10 +66,10 @@
 					<div class="lobby-status-box">
 						<strong>Lobby Hours</strong>
 						<div class="lobby-status-row">
-							<span>Mon–Fri</span><span>9:00 AM – 5:00 PM</span>
+							<span>Mon–Fri</span><span>9:00 AM – 5:00 PM CST</span>
 						</div>
 						<div class="lobby-status-row">
-							<span>Sat–Sun</span><span>10:00 AM – 3:30 PM</span>
+							<span>Sat–Sun</span><span>10:00 AM – 3:30 PM CST</span>
 						</div>
 					</div>
 				</div>
@@ -78,9 +78,9 @@
 			<div class="lobby-info-panels">
 				<div class="lobby-info-card lobby-info-hours">
 					<strong>Lobby Hours</strong>
-					<p><span>Monday–Friday</span><span>9:00 AM – 5:00 PM</span></p>
-					<p><span>Saturday–Sunday</span><span>10:00 AM – 3:00 PM</span></p>
-					<small>Our virtual lobby stays open until 3:30 PM on weekends.</small>
+					<p><span>Monday–Friday</span><span>9:00 AM – 5:00 PM CST</span></p>
+					<p><span>Saturday–Sunday</span><span>10:00 AM – 3:30 PM CST</span></p>
+					<small>Our virtual lobby stays open until 3:30 PM CST on weekends.</small>
 				</div>
 				<div class="lobby-info-card lobby-info-virtual">
 					<strong>100% Virtual</strong>

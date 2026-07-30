@@ -28,7 +28,7 @@
 		<aside class="cta">
 			<div class="eyebrow">Ready to Get Started?</div>
 			<h3>Join the Virtual Lobby.</h3>
-			<p class="hours"><b>Monday–Friday:</b> 9:00 AM–5:00 PM<br><b>Saturday–Sunday:</b> 10:00 AM–3:30 PM</p>
+			<p class="hours"><b>Monday–Friday:</b> 9:00 AM–5:00 PM CST<br><b>Saturday–Sunday:</b> 10:00 AM–3:30 PM CST</p>
 			<button class="btn btn-gold open-lobby" type="button">Enter Virtual Lobby →</button>
 		</aside>
 	</div>

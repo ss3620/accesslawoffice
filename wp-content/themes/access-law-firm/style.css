@@ -489,6 +489,12 @@ header.site-header {
   height: 8px;
 }
 
+.lobby-card-foot--closed .dot,
+.lobby-card-closed .lobby-card-foot .dot,
+.availability-closed .lobby-card-foot .dot {
+  background: #d92d20;
+}
+
 .lobby-card-offline {
   margin: 0 0 10px;
   color: #5d6b81;
