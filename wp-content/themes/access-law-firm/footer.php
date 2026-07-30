@@ -80,7 +80,7 @@
 					<strong>Lobby Hours</strong>
 					<p><span>Monday–Friday</span><span>9:00 AM – 5:00 PM CST</span></p>
 					<p><span>Saturday–Sunday</span><span>10:00 AM – 3:30 PM CST</span></p>
-					<small>Our virtual lobby stays open until 3:30 PM CST on weekends.</small>
+					<small>Our virtual lobby stays open until 3:30&nbsp;PM CST on weekends.</small>
 				</div>
 				<div class="lobby-info-card lobby-info-virtual">
 					<strong>100% Virtual</strong>
