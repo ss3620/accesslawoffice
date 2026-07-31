@@ -2270,3 +2270,225 @@ body.elementor-page .elementor-column-gap-default > .elementor-column > .element
   padding-left: 0;
   padding-right: 0;
 }
+
+/* =========================================================
+   Welcome intro gate
+   ========================================================= */
+
+html.intro-modal-open {
+  overflow: hidden;
+}
+
+.intro-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(8, 24, 52, 0.78);
+  backdrop-filter: blur(5px);
+}
+
+.intro-modal.open {
+  display: flex;
+}
+
+.intro-modal-card {
+  position: relative;
+  width: min(560px, 100%);
+  background: #fff;
+  border-radius: 18px;
+  padding: 44px 40px 28px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(8, 44, 98, 0.28);
+  animation: introModalIn 0.35s ease-out;
+}
+
+@keyframes introModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-modal-card {
+    animation: none;
+  }
+}
+
+.intro-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.intro-modal-close:hover,
+.intro-modal-close:focus-visible {
+  background: var(--soft);
+  outline: none;
+}
+
+.intro-modal-title {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.35rem, 3.6vw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+
+.intro-modal-title > span {
+  display: inline;
+}
+
+.intro-modal-x,
+.intro-modal-eq {
+  margin: 0 0.2em;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.intro-modal-accent {
+  color: var(--gold);
+}
+
+.intro-modal-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 22px 0 20px;
+}
+
+.intro-modal-line {
+  display: block;
+  width: 72px;
+  height: 1px;
+  background: var(--gold);
+  opacity: 0.85;
+}
+
+.intro-modal-scales {
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.intro-modal-copy {
+  margin: 0 auto 26px;
+  max-width: 40ch;
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.intro-modal-enter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 16px 22px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.intro-modal-enter:hover,
+.intro-modal-enter:focus-visible {
+  background: var(--blue);
+  outline: none;
+}
+
+.intro-modal-enter:active {
+  transform: translateY(1px);
+}
+
+.intro-modal-timer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 22px;
+  padding-top: 4px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  text-align: left;
+}
+
+.intro-modal-timer-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.intro-modal-timer-text svg {
+  flex-shrink: 0;
+  color: var(--gold);
+}
+
+.intro-modal-timer-text strong {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.intro-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(201, 146, 47, 0.35);
+}
+
+@media (max-width: 560px) {
+  .intro-modal-card {
+    padding: 40px 22px 22px;
+    border-radius: 16px;
+  }
+
+  .intro-modal-line {
+    width: 40px;
+  }
+
+  .intro-modal-timer {
+    align-items: flex-start;
+  }
+
+  .intro-modal-timer-text {
+    font-size: 0.8rem;
+  }
+}

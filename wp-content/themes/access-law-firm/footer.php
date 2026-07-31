@@ -30,6 +30,45 @@
 	</div>
 </footer>
 
+<!-- Welcome intro gate (auto-closes; close or enter) -->
+<div class="intro-modal" id="introModal" role="dialog" aria-modal="true" aria-labelledby="introModalTitle" aria-hidden="true" hidden>
+	<div class="intro-modal-card">
+		<button class="intro-modal-close" type="button" aria-label="Close welcome message" data-intro-dismiss>&times;</button>
+		<h2 class="intro-modal-title" id="introModalTitle">
+			<span>Experience</span>
+			<span class="intro-modal-x" aria-hidden="true">&times;</span>
+			<span>Affordability</span>
+			<span class="intro-modal-eq" aria-hidden="true">=</span>
+			<span class="intro-modal-accent">Access</span>
+		</h2>
+		<div class="intro-modal-divider" aria-hidden="true">
+			<span class="intro-modal-line"></span>
+			<svg class="intro-modal-scales" viewBox="0 0 48 48" width="36" height="36" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M24 8v28" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+				<path d="M16 36h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+				<path d="M10 16h28" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+				<path d="M14 16l-6 12h12l-6-12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+				<path d="M34 16l-6 12h12l-6-12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+				<circle cx="24" cy="8" r="2.5" fill="currentColor"/>
+			</svg>
+			<span class="intro-modal-line"></span>
+		</div>
+		<p class="intro-modal-copy">
+			At Access Law Office, we believe everyone deserves experienced, high-quality immigration representation. Our mission is to make exceptional legal services accessible to individuals and families through practical, client-focused solutions.
+		</p>
+		<button class="intro-modal-enter" type="button" data-intro-dismiss>
+			Enter Access Law Office <span aria-hidden="true">&gt;</span>
+		</button>
+		<div class="intro-modal-timer" aria-live="polite">
+			<span class="intro-modal-timer-text">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+				This message will close automatically in <strong data-intro-seconds>5</strong> seconds.
+			</span>
+			<span class="intro-modal-badge" data-intro-seconds aria-hidden="true">5</span>
+		</div>
+	</div>
+</div>
+
 <!-- Virtual Lobby multi-step popup -->
 <div class="lobby-modal" id="lobbyModal" role="dialog" aria-modal="true" aria-labelledby="lobbyModalTitle" aria-hidden="true">
 	<div class="lobby-modal-card">

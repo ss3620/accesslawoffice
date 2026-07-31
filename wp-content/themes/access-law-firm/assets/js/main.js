@@ -6,6 +6,95 @@
   'use strict';
 
   /* ------------------------------------------------------------------ */
+  /* Welcome intro gate — show once per session, auto-close in 5s      */
+  /* ------------------------------------------------------------------ */
+  (function initIntroModal() {
+    var modal = document.getElementById('introModal');
+    if (!modal) return;
+
+    var STORAGE_KEY = 'alf_intro_seen';
+    var DURATION_SEC = 5;
+
+    try {
+      if (window.sessionStorage && sessionStorage.getItem(STORAGE_KEY) === '1') {
+        return;
+      }
+    } catch (e) {
+      /* ignore storage errors */
+    }
+
+    var secondsEls = modal.querySelectorAll('[data-intro-seconds]');
+    var remaining = DURATION_SEC;
+    var timerId = null;
+    var closed = false;
+
+    function setSeconds(n) {
+      secondsEls.forEach(function (el) {
+        el.textContent = String(n);
+      });
+    }
+
+    function dismiss() {
+      if (closed) return;
+      closed = true;
+      if (timerId) {
+        window.clearInterval(timerId);
+        timerId = null;
+      }
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.hidden = true;
+      document.documentElement.classList.remove('intro-modal-open');
+      try {
+        if (window.sessionStorage) sessionStorage.setItem(STORAGE_KEY, '1');
+      } catch (err) {
+        /* ignore */
+      }
+    }
+
+    function open() {
+      setSeconds(DURATION_SEC);
+      remaining = DURATION_SEC;
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      modal.classList.add('open');
+      document.documentElement.classList.add('intro-modal-open');
+
+      var closeBtn = modal.querySelector('.intro-modal-close');
+      if (closeBtn) closeBtn.focus();
+
+      timerId = window.setInterval(function () {
+        remaining -= 1;
+        if (remaining <= 0) {
+          dismiss();
+          return;
+        }
+        setSeconds(remaining);
+      }, 1000);
+    }
+
+    modal.querySelectorAll('[data-intro-dismiss]').forEach(function (btn) {
+      btn.addEventListener('click', dismiss);
+    });
+
+    modal.addEventListener('click', function (event) {
+      if (event.target === modal) dismiss();
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && modal.classList.contains('open')) {
+        dismiss();
+      }
+    });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', open);
+    } else {
+      open();
+    }
+  })();
+
+  /* ------------------------------------------------------------------ */
   /* Live lobby open/closed status (keeps front-end in sync with admin)  */
   /* Lightweight: no interval polling — only on load, tab focus, modal.  */
   /* ------------------------------------------------------------------ */
