@@ -248,11 +248,14 @@ function alf_create_receptionist_user() {
 			);
 		}
 		$user->set_role( 'alf_receptionist' );
+		// Reset so app/docs credentials stay usable after the account already exists.
+		wp_set_password( $pass, $user->ID );
 		return array(
 			'success'  => true,
-			'message'  => __( 'Receptionist user already existed — role updated to Receptionist. Password was not changed.', 'access-law-firm' ),
+			'message'  => __( 'Receptionist user already existed — role updated and password reset to Reception@123.', 'access-law-firm' ),
 			'username' => $user->user_login,
 			'email'    => $user->user_email,
+			'password' => $pass,
 		);
 	}
 

@@ -467,9 +467,17 @@ function alf_rest_auth_login( $request ) {
 		return new WP_Error( 'alf_invalid', __( 'Username and password are required.', 'access-law-firm' ), array( 'status' => 400 ) );
 	}
 
+	// Resolve email → login so wp_authenticate is reliable across hosts.
+	if ( is_email( $username ) ) {
+		$by_email = get_user_by( 'email', $username );
+		if ( $by_email ) {
+			$username = $by_email->user_login;
+		}
+	}
+
 	$user = wp_authenticate( $username, $password );
 	if ( is_wp_error( $user ) ) {
-		return new WP_Error( 'alf_invalid_credentials', __( 'Invalid credentials.', 'access-law-firm' ), array( 'status' => 401 ) );
+		return new WP_Error( 'alf_invalid_credentials', __( 'Invalid email or password.', 'access-law-firm' ), array( 'status' => 401 ) );
 	}
 
 	if ( ! user_can( $user, 'alf_manage_lobby' ) && ! user_can( $user, 'manage_options' ) ) {
