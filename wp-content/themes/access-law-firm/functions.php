@@ -17,6 +17,8 @@ require_once get_template_directory() . '/inc/twilio-otp.php';
 require_once get_template_directory() . '/inc/captcha.php';
 require_once get_template_directory() . '/inc/lobby-admin.php';
 require_once get_template_directory() . '/inc/lobby-visits.php';
+require_once get_template_directory() . '/inc/app-data.php';
+require_once get_template_directory() . '/inc/rest-api.php';
 require_once get_template_directory() . '/inc/elementor-home.php';
 
 /**
