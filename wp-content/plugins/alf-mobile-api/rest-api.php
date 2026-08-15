@@ -561,7 +561,10 @@ function alf_rest_client_activate( $request ) {
 				);
 			}
 		}
-		return new WP_Error( 'alf_code_used', __( 'That activation code has already been used.', 'access-law-firm' ), array( 'status' => 409 ) );
+		// Demo code can be reused for testing with a new email.
+		if ( 'ALF-DEMO' !== $code ) {
+			return new WP_Error( 'alf_code_used', __( 'That activation code has already been used.', 'access-law-firm' ), array( 'status' => 409 ) );
+		}
 	}
 
 	if ( $bound_email && strtolower( $bound_email ) !== strtolower( $email ) ) {
