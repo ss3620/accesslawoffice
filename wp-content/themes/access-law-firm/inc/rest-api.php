@@ -566,7 +566,7 @@ function alf_rest_client_activate( $request ) {
 		}
 	}
 
-	if ( $bound_email && strtolower( $bound_email ) !== strtolower( $email ) ) {
+	if ( 'ALF-DEMO' !== $code && $bound_email && strtolower( $bound_email ) !== strtolower( $email ) ) {
 		return new WP_Error( 'alf_email_mismatch', __( 'This code was issued to a different email.', 'access-law-firm' ), array( 'status' => 403 ) );
 	}
 
@@ -947,6 +947,10 @@ function alf_rest_client_lobby_enter( $request ) {
 	update_post_meta( $client_id, 'lobby_visit_id', $visit_id );
 	update_post_meta( $client_id, 'lobby_visit_token', $token );
 
+	if ( function_exists( 'alf_sync_appointment_from_lobby_visit' ) ) {
+		alf_sync_appointment_from_lobby_visit( $visit_id, 'app', (string) $client_id );
+	}
+
 	return rest_ensure_response( alf_get_client_lobby_state( $client_id ) );
 }
 
@@ -1048,6 +1052,10 @@ function alf_rest_lobby_check_in( $request ) {
 
 	$token = wp_hash( $post_id . '|' . $phone . '|' . wp_salt( 'nonce' ) );
 	set_transient( 'alf_visit_tok_' . $post_id, $token, 4 * HOUR_IN_SECONDS );
+
+	if ( function_exists( 'alf_sync_appointment_from_lobby_visit' ) ) {
+		alf_sync_appointment_from_lobby_visit( $post_id, 'website' );
+	}
 
 	return rest_ensure_response(
 		array(
@@ -1425,15 +1433,12 @@ function alf_rest_appointments_list( $request ) {
 	$posts = get_posts( $args );
 	$items = array();
 	foreach ( $posts as $post ) {
-		$items[] = array(
-			'id'              => (string) $post->ID,
-			'clientId'        => (string) get_post_meta( $post->ID, 'client_id', true ),
-			'clientName'      => (string) get_post_meta( $post->ID, 'client_name', true ),
-			'preferredWindow' => (string) get_post_meta( $post->ID, 'preferred_window', true ),
-			'note'            => (string) get_post_meta( $post->ID, 'note', true ),
-			'status'          => (string) ( get_post_meta( $post->ID, 'status', true ) ?: 'requested' ),
-			'createdAt'       => get_post_time( 'c', true, $post ),
-		);
+		$row = function_exists( 'alf_serialize_appointment' )
+			? alf_serialize_appointment( $post->ID )
+			: null;
+		if ( $row ) {
+			$items[] = $row;
+		}
 	}
 	return rest_ensure_response( array( 'items' => $items ) );
 }
@@ -1462,35 +1467,24 @@ function alf_rest_appointments_create( $request ) {
 	$window = sanitize_text_field( (string) $request->get_param( 'preferredWindow' ) );
 	$note   = sanitize_textarea_field( (string) $request->get_param( 'note' ) );
 
-	$id = wp_insert_post(
+	$appointment_id = alf_create_appointment_record(
 		array(
-			'post_type'   => 'alf_appointment',
-			'post_status' => 'publish',
-			'post_title'  => $client['name'] . ' — ' . $window,
-		),
-		true
-	);
-	if ( is_wp_error( $id ) ) {
-		return $id;
-	}
-
-	update_post_meta( $id, 'client_id', (string) $client_id );
-	update_post_meta( $id, 'client_name', $client['name'] );
-	update_post_meta( $id, 'preferred_window', $window );
-	update_post_meta( $id, 'note', $note );
-	update_post_meta( $id, 'status', 'requested' );
-
-	return rest_ensure_response(
-		array(
-			'id'              => (string) $id,
-			'clientId'        => (string) $client_id,
-			'clientName'      => $client['name'],
-			'preferredWindow' => $window,
-			'note'            => $note,
-			'status'          => 'requested',
-			'createdAt'       => get_post_time( 'c', true, $id ),
+			'client_id'        => (string) $client_id,
+			'client_name'      => $client['name'],
+			'email'            => $client['email'],
+			'phone'            => '',
+			'preferred_window' => $window,
+			'note'             => $note,
+			'status'           => 'requested',
+			'source'           => 'app',
 		)
 	);
+	if ( ! $appointment_id ) {
+		return new WP_Error( 'alf_create_failed', __( 'Could not create appointment.', 'access-law-firm' ), array( 'status' => 500 ) );
+	}
+
+	$row = alf_serialize_appointment( $appointment_id );
+	return rest_ensure_response( $row ? $row : array() );
 }
 
 /**

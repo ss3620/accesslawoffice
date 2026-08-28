@@ -277,3 +277,158 @@ function alf_serialize_staff_user( $user ) {
 		'capabilities' => $caps,
 	);
 }
+
+/**
+ * Create or return an existing unified appointment record.
+ *
+ * Used by the mobile app and the website Virtual Lobby wizard so staff see
+ * one appointment list.
+ *
+ * @param array $args Appointment fields.
+ * @return int Appointment post ID, or 0 on failure.
+ */
+function alf_create_appointment_record( $args ) {
+	$args = wp_parse_args(
+		$args,
+		array(
+			'client_id'        => '',
+			'client_name'      => '',
+			'email'            => '',
+			'phone'            => '',
+			'preferred_window' => '',
+			'note'             => '',
+			'status'           => 'requested',
+			'source'           => 'app',
+			'visit_id'         => 0,
+		)
+	);
+
+	$visit_id = (int) $args['visit_id'];
+	if ( $visit_id > 0 ) {
+		$existing = get_posts(
+			array(
+				'post_type'      => 'alf_appointment',
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'meta_key'       => 'visit_id',
+				'meta_value'     => (string) $visit_id,
+			)
+		);
+		if ( ! empty( $existing ) ) {
+			return (int) $existing[0];
+		}
+	}
+
+	$name   = sanitize_text_field( (string) $args['client_name'] );
+	$window = sanitize_text_field( (string) $args['preferred_window'] );
+	if ( '' === $name || '' === $window ) {
+		return 0;
+	}
+
+	$id = wp_insert_post(
+		array(
+			'post_type'   => 'alf_appointment',
+			'post_status' => 'publish',
+			'post_title'  => $name . ' — ' . $window,
+		),
+		true
+	);
+	if ( is_wp_error( $id ) || ! $id ) {
+		return 0;
+	}
+
+	update_post_meta( $id, 'client_id', sanitize_text_field( (string) $args['client_id'] ) );
+	update_post_meta( $id, 'client_name', $name );
+	update_post_meta( $id, 'email', sanitize_email( (string) $args['email'] ) );
+	update_post_meta( $id, 'phone', sanitize_text_field( (string) $args['phone'] ) );
+	update_post_meta( $id, 'preferred_window', $window );
+	update_post_meta( $id, 'note', sanitize_textarea_field( (string) $args['note'] ) );
+	update_post_meta( $id, 'status', sanitize_key( (string) $args['status'] ) ?: 'requested' );
+	update_post_meta( $id, 'source', sanitize_key( (string) $args['source'] ) ?: 'app' );
+	if ( $visit_id > 0 ) {
+		update_post_meta( $id, 'visit_id', (string) $visit_id );
+	}
+
+	return (int) $id;
+}
+
+/**
+ * Serialize an appointment post for the REST API / mobile app.
+ *
+ * @param int $post_id Appointment post ID.
+ * @return array|null
+ */
+function alf_serialize_appointment( $post_id ) {
+	$post = get_post( $post_id );
+	if ( ! $post || 'alf_appointment' !== $post->post_type ) {
+		return null;
+	}
+
+	$visit_id = (int) get_post_meta( $post_id, 'visit_id', true );
+
+	return array(
+		'id'              => (string) $post_id,
+		'clientId'        => (string) get_post_meta( $post_id, 'client_id', true ),
+		'clientName'      => (string) get_post_meta( $post_id, 'client_name', true ),
+		'email'           => (string) get_post_meta( $post_id, 'email', true ),
+		'phone'           => (string) get_post_meta( $post_id, 'phone', true ),
+		'preferredWindow' => (string) get_post_meta( $post_id, 'preferred_window', true ),
+		'note'            => (string) get_post_meta( $post_id, 'note', true ),
+		'status'          => (string) ( get_post_meta( $post_id, 'status', true ) ?: 'requested' ),
+		'source'          => (string) ( get_post_meta( $post_id, 'source', true ) ?: 'app' ),
+		'visitId'         => $visit_id ? (string) $visit_id : null,
+		'createdAt'       => get_post_time( 'c', true, $post_id ),
+	);
+}
+
+/**
+ * Mirror a lobby visit into the unified appointments list.
+ *
+ * @param int    $visit_id  Lobby visit post ID.
+ * @param string $source    `website` or `app`.
+ * @param string $client_id Optional app client ID.
+ * @return int Appointment post ID.
+ */
+function alf_sync_appointment_from_lobby_visit( $visit_id, $source = 'website', $client_id = '' ) {
+	$visit_id = (int) $visit_id;
+	if ( $visit_id <= 0 ) {
+		return 0;
+	}
+
+	$name   = (string) get_post_meta( $visit_id, 'visitor_name', true );
+	$phone  = (string) get_post_meta( $visit_id, 'phone_e164', true );
+	$matter = (string) get_post_meta( $visit_id, 'matter_type', true );
+	if ( '' === $client_id ) {
+		$client_id = (string) get_post_meta( $visit_id, 'app_client_id', true );
+	}
+
+	$email = '';
+	if ( '' !== $client_id && function_exists( 'alf_serialize_app_client' ) ) {
+		$client = alf_serialize_app_client( (int) $client_id );
+		if ( $client ) {
+			$email = (string) $client['email'];
+			if ( '' === $name ) {
+				$name = (string) $client['name'];
+			}
+		}
+	}
+	if ( '' === $name ) {
+		$post = get_post( $visit_id );
+		$name = $post ? $post->post_title : __( 'Visitor', 'access-law-firm' );
+	}
+
+	return alf_create_appointment_record(
+		array(
+			'client_id'        => $client_id,
+			'client_name'      => $name,
+			'email'            => $email,
+			'phone'            => $phone,
+			'preferred_window' => __( 'Virtual Lobby — immediate', 'access-law-firm' ),
+			'note'             => $matter,
+			'status'           => 'requested',
+			'source'           => $source,
+			'visit_id'         => $visit_id,
+		)
+	);
+}

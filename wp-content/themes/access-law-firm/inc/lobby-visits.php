@@ -183,6 +183,10 @@ function alf_ajax_check_in() {
 	$token = wp_hash( $post_id . '|' . $phone . '|' . wp_salt( 'nonce' ) );
 	set_transient( 'alf_visit_tok_' . $post_id, $token, 4 * HOUR_IN_SECONDS );
 
+	if ( function_exists( 'alf_sync_appointment_from_lobby_visit' ) ) {
+		alf_sync_appointment_from_lobby_visit( $post_id, 'website' );
+	}
+
 	wp_send_json_success(
 		array(
 			'visit_id' => (int) $post_id,
