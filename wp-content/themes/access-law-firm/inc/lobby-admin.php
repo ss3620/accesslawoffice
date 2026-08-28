@@ -163,7 +163,7 @@ function alf_receptionist_block_admin_screens() {
 		return;
 	}
 
-	$allowed_pages = array( 'alf-virtual-lobby' );
+	$allowed_pages = array( 'alf-virtual-lobby', 'alf-appointments' );
 	$page          = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 
 	$ok = false;
@@ -207,6 +207,15 @@ function alf_register_lobby_admin_menu() {
 		'alf_manage_lobby',
 		'alf-virtual-lobby',
 		'alf_render_lobby_queue_page'
+	);
+
+	add_submenu_page(
+		'alf-virtual-lobby',
+		__( 'Appointments', 'access-law-firm' ),
+		__( 'Appointments', 'access-law-firm' ),
+		'alf_manage_lobby',
+		'alf-appointments',
+		'alf_render_appointments_admin_page'
 	);
 
 	if ( current_user_can( 'manage_options' ) ) {
@@ -491,7 +500,8 @@ function alf_render_lobby_queue_page() {
  */
 function alf_enqueue_lobby_admin_assets( $hook ) {
 	$on_console = ( is_string( $hook ) && false !== strpos( $hook, 'alf-virtual-lobby' ) );
-	if ( ! $on_console || ! alf_user_can_manage_lobby() ) {
+	$on_appts   = ( 'virtual-lobby_page_alf-appointments' === $hook );
+	if ( ( ! $on_console && ! $on_appts ) || ! alf_user_can_manage_lobby() ) {
 		return;
 	}
 
@@ -605,11 +615,16 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
 })();
 JS;
 
+	$appts_js = function_exists( 'alf_appointments_admin_js' ) ? alf_appointments_admin_js() : '';
+
 	// Footer handle so this runs after the queue markup exists.
 	wp_register_script( 'alf-lobby-admin', false, array(), defined( 'ALF_THEME_VERSION' ) ? ALF_THEME_VERSION : null, true );
 	wp_enqueue_script( 'alf-lobby-admin' );
 	wp_add_inline_script( 'alf-lobby-admin', 'window.alfLobbyAdmin = ' . $cfg . ';', 'before' );
 	wp_add_inline_script( 'alf-lobby-admin', $js, 'after' );
+	if ( $on_appts && '' !== $appts_js ) {
+		wp_add_inline_script( 'alf-lobby-admin', $appts_js, 'after' );
+	}
 }
 add_action( 'admin_enqueue_scripts', 'alf_enqueue_lobby_admin_assets' );
 

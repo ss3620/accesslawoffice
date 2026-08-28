@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Access Law Firm — Mobile API
  * Description: REST API (/wp-json/alf/v1/) that connects the Flutter app to WordPress lobby, clients, chat, and staff auth.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Access Law Office
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ALF_MOBILE_API_VERSION', '1.0.1' );
+define( 'ALF_MOBILE_API_VERSION', '1.0.2' );
 define( 'ALF_MOBILE_API_LOADED', true );
 define( 'ALF_MOBILE_API_DIR', plugin_dir_path( __FILE__ ) );
 

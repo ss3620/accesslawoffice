@@ -279,6 +279,136 @@ function alf_serialize_staff_user( $user ) {
 }
 
 /**
+ * Find an existing appointment to merge into (same visit or same client).
+ *
+ * @param array $args Appointment fields.
+ * @return int Existing post ID, or 0.
+ */
+function alf_find_existing_appointment( $args ) {
+	$visit_id  = (int) ( $args['visit_id'] ?? 0 );
+	$client_id = sanitize_text_field( (string) ( $args['client_id'] ?? '' ) );
+
+	if ( $visit_id > 0 ) {
+		$by_visit = get_posts(
+			array(
+				'post_type'      => 'alf_appointment',
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'meta_key'       => 'visit_id',
+				'meta_value'     => (string) $visit_id,
+			)
+		);
+		if ( ! empty( $by_visit ) ) {
+			return (int) $by_visit[0];
+		}
+	}
+
+	if ( '' === $client_id ) {
+		return 0;
+	}
+
+	$by_client = get_posts(
+		array(
+			'post_type'      => 'alf_appointment',
+			'post_status'    => 'any',
+			'posts_per_page' => 1,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+			'fields'         => 'ids',
+			'meta_query'     => array(
+				'relation' => 'AND',
+				array(
+					'key'   => 'client_id',
+					'value' => $client_id,
+				),
+				array(
+					'key'     => 'status',
+					'value'   => array( 'requested', 'confirmed' ),
+					'compare' => 'IN',
+				),
+			),
+		)
+	);
+	if ( empty( $by_client ) ) {
+		return 0;
+	}
+
+	$existing_id = (int) $by_client[0];
+	$linked      = (int) get_post_meta( $existing_id, 'visit_id', true );
+	if ( $linked && $visit_id > 0 && $linked !== $visit_id ) {
+		return 0;
+	}
+
+	return $existing_id;
+}
+
+/**
+ * Update an existing appointment with newer details.
+ *
+ * @param int   $post_id Appointment post ID.
+ * @param array $args    Appointment fields.
+ */
+function alf_update_appointment_record( $post_id, $args ) {
+	$post_id = (int) $post_id;
+	if ( $post_id <= 0 ) {
+		return;
+	}
+
+	$name   = sanitize_text_field( (string) ( $args['client_name'] ?? '' ) );
+	$window = sanitize_text_field( (string) ( $args['preferred_window'] ?? '' ) );
+	if ( '' !== $name && '' !== $window ) {
+		wp_update_post(
+			array(
+				'ID'         => $post_id,
+				'post_title' => $name . ' — ' . $window,
+			)
+		);
+	}
+
+	$client_id = sanitize_text_field( (string) ( $args['client_id'] ?? '' ) );
+	if ( '' !== $client_id ) {
+		update_post_meta( $post_id, 'client_id', $client_id );
+	}
+	if ( '' !== $name ) {
+		update_post_meta( $post_id, 'client_name', $name );
+	}
+
+	$email = sanitize_email( (string) ( $args['email'] ?? '' ) );
+	if ( '' !== $email ) {
+		update_post_meta( $post_id, 'email', $email );
+	}
+
+	$phone = sanitize_text_field( (string) ( $args['phone'] ?? '' ) );
+	if ( '' !== $phone ) {
+		update_post_meta( $post_id, 'phone', $phone );
+	}
+
+	if ( '' !== $window ) {
+		update_post_meta( $post_id, 'preferred_window', $window );
+	}
+
+	$note = sanitize_textarea_field( (string) ( $args['note'] ?? '' ) );
+	if ( '' !== $note ) {
+		update_post_meta( $post_id, 'note', $note );
+	}
+
+	$visit_id = (int) ( $args['visit_id'] ?? 0 );
+	if ( $visit_id > 0 ) {
+		update_post_meta( $post_id, 'visit_id', (string) $visit_id );
+	}
+
+	$source = sanitize_key( (string) ( $args['source'] ?? '' ) );
+	if ( '' !== $source ) {
+		$current = (string) get_post_meta( $post_id, 'source', true );
+		// Keep the first source unless this update adds a lobby link from the other channel.
+		if ( '' === $current || ( 'website' === $source && $visit_id > 0 ) ) {
+			update_post_meta( $post_id, 'source', $source );
+		}
+	}
+}
+
+/**
  * Create or return an existing unified appointment record.
  *
  * @param array $args Appointment fields.
@@ -300,21 +430,10 @@ function alf_create_appointment_record( $args ) {
 		)
 	);
 
-	$visit_id = (int) $args['visit_id'];
-	if ( $visit_id > 0 ) {
-		$existing = get_posts(
-			array(
-				'post_type'      => 'alf_appointment',
-				'post_status'    => 'any',
-				'posts_per_page' => 1,
-				'fields'         => 'ids',
-				'meta_key'       => 'visit_id',
-				'meta_value'     => (string) $visit_id,
-			)
-		);
-		if ( ! empty( $existing ) ) {
-			return (int) $existing[0];
-		}
+	$existing_id = alf_find_existing_appointment( $args );
+	if ( $existing_id ) {
+		alf_update_appointment_record( $existing_id, $args );
+		return $existing_id;
 	}
 
 	$name   = sanitize_text_field( (string) $args['client_name'] );
@@ -343,6 +462,7 @@ function alf_create_appointment_record( $args ) {
 	update_post_meta( $id, 'note', sanitize_textarea_field( (string) $args['note'] ) );
 	update_post_meta( $id, 'status', sanitize_key( (string) $args['status'] ) ?: 'requested' );
 	update_post_meta( $id, 'source', sanitize_key( (string) $args['source'] ) ?: 'app' );
+	$visit_id = (int) $args['visit_id'];
 	if ( $visit_id > 0 ) {
 		update_post_meta( $id, 'visit_id', (string) $visit_id );
 	}

@@ -16,6 +16,7 @@ require_once get_template_directory() . '/inc/settings.php';
 require_once get_template_directory() . '/inc/twilio-otp.php';
 require_once get_template_directory() . '/inc/captcha.php';
 require_once get_template_directory() . '/inc/lobby-admin.php';
+require_once get_template_directory() . '/inc/lobby-appointments-admin.php';
 require_once get_template_directory() . '/inc/lobby-visits.php';
 // Mobile API: prefer the "Access Law Firm — Mobile API" plugin when active;
 // otherwise load from the theme so local/dev still works.
