@@ -286,6 +286,45 @@ function alf_render_lobby_toggle_control( $context = 'console' ) {
 }
 
 /**
+ * Public firm phone used by the Call Now / Text Now buttons.
+ */
+if ( ! defined( 'ALF_DEFAULT_FIRM_PHONE' ) ) {
+	define( 'ALF_DEFAULT_FIRM_PHONE', '(346) 871-4730' );
+}
+
+/**
+ * Firm phone number as displayed on the site.
+ *
+ * @return string
+ */
+function alf_firm_phone_display() {
+	$stored = trim( (string) alf_get_setting( 'firm_phone', '' ) );
+	return '' !== $stored ? $stored : ALF_DEFAULT_FIRM_PHONE;
+}
+
+/**
+ * Firm phone in E.164 for tel: and sms: links.
+ *
+ * @return string
+ */
+function alf_firm_phone_e164() {
+	$display = alf_firm_phone_display();
+
+	if ( function_exists( 'alf_normalize_phone' ) ) {
+		$normalized = alf_normalize_phone( $display, '1' );
+		if ( '' !== $normalized ) {
+			return $normalized;
+		}
+	}
+
+	$digits = preg_replace( '/\D/', '', $display );
+	if ( '' === $digits ) {
+		return '';
+	}
+	return 10 === strlen( $digits ) ? '+1' . $digits : '+' . $digits;
+}
+
+/**
  * Whether Twilio is fully configured.
  *
  * @return bool
@@ -350,6 +389,22 @@ function alf_register_settings() {
 			'sanitize_callback' => 'alf_sanitize_settings',
 			'default'           => array(),
 		)
+	);
+
+	add_settings_section(
+		'alf_contact_section',
+		__( 'Firm contact', 'access-law-firm' ),
+		'alf_contact_section_intro',
+		'access-law-firm'
+	);
+
+	add_settings_field(
+		'firm_phone',
+		__( 'Public phone number', 'access-law-firm' ),
+		'alf_field_text',
+		'access-law-firm',
+		'alf_contact_section',
+		array( 'key' => 'firm_phone', 'placeholder' => ALF_DEFAULT_FIRM_PHONE )
 	);
 
 	add_settings_section(
@@ -440,6 +495,22 @@ function alf_register_settings() {
 add_action( 'admin_init', 'alf_register_settings' );
 
 /**
+ * Intro for the firm contact section.
+ */
+function alf_contact_section_intro() {
+	printf(
+		'<p>%s</p>',
+		esc_html(
+			sprintf(
+				/* translators: %s: default phone number */
+				__( 'Number behind the Call Now and Text Now buttons on the website. Leave blank to use %s.', 'access-law-firm' ),
+				ALF_DEFAULT_FIRM_PHONE
+			)
+		)
+	);
+}
+
+/**
  * Intro for verification toggles.
  */
 function alf_verify_section_intro() {
@@ -482,6 +553,10 @@ function alf_sanitize_settings( $input ) {
 
 	$output['sms_enabled']     = ! empty( $input['sms_enabled'] ) ? 1 : 0;
 	$output['captcha_enabled'] = ! empty( $input['captcha_enabled'] ) ? 1 : 0;
+
+	if ( isset( $input['firm_phone'] ) ) {
+		$output['firm_phone'] = sanitize_text_field( $input['firm_phone'] );
+	}
 
 	if ( isset( $input['recaptcha_site_key'] ) ) {
 		$output['recaptcha_site_key'] = sanitize_text_field( $input['recaptcha_site_key'] );

@@ -124,6 +124,22 @@ p {
   cursor: not-allowed;
 }
 
+.btn-call,
+.btn-text {
+  gap: 8px;
+  text-decoration: none;
+}
+
+.btn-icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 header.site-header {
   position: sticky;
   top: 0;

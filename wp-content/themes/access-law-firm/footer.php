@@ -17,7 +17,22 @@
 		</div>
 		<div>
 			<b>Contact</b>
-			<p style="margin-top:10px">00000000<br>info@accesslawoffice.com<br>Houston, Texas</p>
+			<?php
+			$alf_footer_phone       = alf_firm_phone_e164();
+			$alf_footer_phone_label = alf_firm_phone_display();
+			?>
+			<p style="margin-top:10px">
+				<?php if ( $alf_footer_phone ) : ?>
+					<a href="tel:<?php echo esc_attr( $alf_footer_phone ); ?>"><?php echo esc_html( $alf_footer_phone_label ); ?></a>
+					<span aria-hidden="true"> · </span>
+					<a href="sms:<?php echo esc_attr( $alf_footer_phone ); ?>"><?php esc_html_e( 'Text us', 'access-law-firm' ); ?></a>
+					<br>
+				<?php endif; ?>
+				info@accesslawoffice.com<br>Houston, Texas
+			</p>
+			<?php if ( $alf_footer_phone ) : ?>
+				<small style="display:block;margin-top:8px;opacity:.75"><?php esc_html_e( 'Message and data rates may apply.', 'access-law-firm' ); ?></small>
+			<?php endif; ?>
 		</div>
 		<div>
 			<b>Quick Links</b>

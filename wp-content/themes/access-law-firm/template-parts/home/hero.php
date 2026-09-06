@@ -17,7 +17,11 @@ $alf_lobby_open = alf_is_lobby_open();
 				<p>Strategic, compassionate representation informed by federal service as an Immigration Judge, Asylum Officer, and USCIS Immigration Officer.</p>
 				<div class="actions">
 					<button class="btn btn-primary open-lobby" type="button">Join Virtual Lobby</button>
+					<?php alf_render_call_text_buttons(); ?>
 				</div>
+				<?php if ( alf_firm_phone_e164() ) : ?>
+					<p class="note"><?php esc_html_e( 'Message and data rates may apply.', 'access-law-firm' ); ?></p>
+				<?php endif; ?>
 			</div>
 
 			<div class="portrait">
