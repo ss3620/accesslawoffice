@@ -163,7 +163,7 @@ function alf_receptionist_block_admin_screens() {
 		return;
 	}
 
-	$allowed_pages = array( 'alf-virtual-lobby', 'alf-appointments' );
+	$allowed_pages = array( 'alf-virtual-lobby', 'alf-appointments', 'alf-app-clients' );
 	$page          = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 
 	$ok = false;
@@ -216,6 +216,15 @@ function alf_register_lobby_admin_menu() {
 		'alf_manage_lobby',
 		'alf-appointments',
 		'alf_render_appointments_admin_page'
+	);
+
+	add_submenu_page(
+		'alf-virtual-lobby',
+		__( 'App Clients', 'access-law-firm' ),
+		__( 'App Clients', 'access-law-firm' ),
+		'alf_manage_lobby',
+		'alf-app-clients',
+		'alf_render_app_clients_admin_page'
 	);
 
 	if ( current_user_can( 'manage_options' ) ) {
