@@ -56,7 +56,10 @@ $alf_doj_pdf        = alf_doc( 'eoir-immigration-judge-announcement.pdf' );
 
 				<p>Serving as an Immigration Judge provided Mr. Kasam with a perspective few immigration attorneys have: experience sitting on the other side of the bench and personally evaluating the arguments, testimony, evidence, and legal issues presented by both the government and the respondent.</p>
 
-				<p class="attorney-doj-inline">
+				<aside class="attorney-doj">
+					<h3>U.S. Department of Justice</h3>
+					<p class="attorney-doj-label">Immigration Judge Service</p>
+					<p>Mr. Kasam’s appointment as an Immigration Judge is reflected in official U.S. Department of Justice materials.</p>
 					<a class="attorney-doj-link" href="<?php echo $alf_doj_pdf; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in alf_doc(). ?>" target="_blank" rel="noopener">
 						<span class="attorney-doj-icon" aria-hidden="true">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 14h6"/><path d="M9 17h4"/></svg>
@@ -64,7 +67,7 @@ $alf_doj_pdf        = alf_doc( 'eoir-immigration-judge-announcement.pdf' );
 						<?php esc_html_e( 'View Official DOJ List (PDF)', 'access-law-firm' ); ?>
 						<span aria-hidden="true">↗</span>
 					</a>
-				</p>
+				</aside>
 
 				<h3>USCIS Service Center Operations — Immigration Services Officer</h3>
 

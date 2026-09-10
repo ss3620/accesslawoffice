@@ -2359,6 +2359,41 @@ body.lobby-open {
   margin-top: 18px !important;
 }
 
+.attorney-doj {
+  margin: 24px 0 8px;
+  background: #eef5fb;
+  border: 1px solid #cbd9e7;
+  border-radius: 18px;
+  padding: 24px 26px;
+}
+
+.attorney-doj > h3 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 1.35rem;
+  color: var(--navy);
+  line-height: 1.2;
+}
+
+.attorney-doj-label {
+  margin-top: 10px;
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 0.98rem;
+}
+
+.attorney-doj > p:not(.attorney-doj-label) {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.attorney-doj .attorney-doj-link {
+  margin-top: 16px;
+  background: #fff;
+}
+
 .attorney-doj-link {
   display: inline-flex;
   align-items: center;
