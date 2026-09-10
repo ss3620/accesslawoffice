@@ -2272,6 +2272,7 @@ body.lobby-open {
 }
 
 .attorney-hero-grid {
+  grid-template-columns: 1.1fr 0.9fr;
   align-items: center;
 }
 
@@ -2290,14 +2291,17 @@ body.lobby-open {
   line-height: 1.05;
 }
 
-.attorney-lead {
-  margin-top: 18px;
-  font-size: 1.08rem;
-  color: var(--ink);
+.attorney-subtitle {
+  font-family: Georgia, serif;
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  color: var(--navy);
+  line-height: 1.35;
+  margin-top: 10px;
 }
 
-.attorney-body {
-  margin-top: 14px;
+.attorney-tagline {
+  margin-top: 18px;
+  font-size: 1.08rem;
   color: var(--muted);
 }
 
@@ -2305,50 +2309,113 @@ body.lobby-open {
   margin-top: 26px;
 }
 
+/* Bio + DOJ callout */
+
+.attorney-bio-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.attorney-bio-copy h2 {
+  margin-bottom: 18px;
+}
+
+.attorney-bio-copy p + p {
+  margin-top: 14px;
+}
+
+.attorney-bio-copy p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.attorney-doj {
+  background: #eef5fb;
+  border: 1px solid #cbd9e7;
+  border-radius: 18px;
+  padding: 26px;
+}
+
+.attorney-doj h3 {
+  font-family: Georgia, serif;
+  font-size: 1.35rem;
+  color: var(--navy);
+  line-height: 1.2;
+}
+
+.attorney-doj-label {
+  margin-top: 10px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.attorney-doj p:not(.attorney-doj-label) {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.attorney-doj-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #bfcce0;
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.attorney-doj-link:hover,
+.attorney-doj-link:focus-visible {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
+.attorney-doj-icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.attorney-doj-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Federal service cards */
+
 .attorney-roles-section {
   background: var(--soft);
 }
 
-.attorney-roles .card {
-  display: flex;
-  flex-direction: column;
+.attorney-agency-cards {
+  grid-template-columns: repeat(4, 1fr);
 }
 
-.attorney-roles .card p {
-  color: var(--muted);
-  font-size: 0.94rem;
-  line-height: 1.5;
+.attorney-agency-card {
+  text-align: center;
+  border-top: 3px solid var(--gold);
 }
 
-.attorney-role-highlight {
-  background: linear-gradient(135deg, #f7fbff, #fffaf0);
-  border-color: #e6d3ac;
-}
-
-.attorney-value-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.attorney-value-grid > div {
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: #fff;
-}
-
-.attorney-value-grid strong {
-  display: block;
+.attorney-agency-card h3 {
+  font-family: Georgia, serif;
+  font-size: 1.02rem;
   color: var(--navy);
-  margin-bottom: 6px;
+  line-height: 1.3;
+  margin-bottom: 10px;
 }
 
-.attorney-value-grid span {
-  display: block;
+.attorney-agency-card p {
   color: var(--muted);
-  font-size: 0.94rem;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
@@ -2391,33 +2458,48 @@ body.lobby-open {
   color: #fff;
 }
 
-.attorney-cta-inner {
-  text-align: center;
-  max-width: 720px;
+.attorney-cta-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
 }
 
-.attorney-cta h2 {
-  margin: 10px 0 14px;
+.attorney-cta-copy h2 {
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  margin-bottom: 8px;
 }
 
-.attorney-cta p {
+.attorney-cta-copy p {
   color: #dbe6f5;
 }
 
 .attorney-cta-actions {
-  justify-content: center;
-  margin-top: 26px;
+  margin: 0;
 }
 
 .attorney-cta-note {
   color: #c6d5e8;
+  margin-top: 10px;
 }
 
 .attorney-editor-content .container > * + * {
   margin-top: 16px;
 }
 
+@media (max-width: 1024px) {
+  .attorney-agency-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
+  .attorney-bio-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
   .attorney-practice-list {
     grid-template-columns: 1fr 1fr;
   }
@@ -2428,9 +2510,17 @@ body.lobby-open {
     min-height: 380px;
   }
 
-  .attorney-value-grid,
+  .attorney-agency-cards,
   .attorney-practice-list {
     grid-template-columns: 1fr;
+  }
+
+  .attorney-cta-bar {
+    display: block;
+  }
+
+  .attorney-cta-actions {
+    margin-top: 22px;
   }
 }
 

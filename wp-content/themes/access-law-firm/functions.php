@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ALF_THEME_VERSION', '1.6.0' );
+define( 'ALF_THEME_VERSION', '1.6.1' );
 
 require_once get_template_directory() . '/inc/settings.php';
 require_once get_template_directory() . '/inc/twilio-otp.php';
@@ -105,6 +105,16 @@ add_action( 'wp_enqueue_scripts', 'alf_enqueue_assets' );
  */
 function alf_img( $filename ) {
 	return esc_url( get_template_directory_uri() . '/assets/img/' . ltrim( $filename, '/' ) );
+}
+
+/**
+ * Helper: theme document URL (PDFs and other downloads).
+ *
+ * @param string $filename File name inside assets/docs.
+ * @return string
+ */
+function alf_doc( $filename ) {
+	return esc_url( get_template_directory_uri() . '/assets/docs/' . ltrim( $filename, '/' ) );
 }
 
 /**
