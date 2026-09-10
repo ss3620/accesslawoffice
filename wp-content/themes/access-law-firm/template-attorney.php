@@ -19,23 +19,25 @@ $alf_doj_pdf        = alf_doc( 'eoir-immigration-judge-announcement.pdf' );
 	<section class="attorney-profile">
 		<div class="container attorney-profile-inner">
 
-			<figure class="attorney-portrait">
-				<img src="<?php echo alf_img( 'stock-attorney.png' ); ?>" alt="Nadeem R. Kasam, Attorney at Law">
-			</figure>
+			<div class="attorney-hero-row">
+				<figure class="attorney-portrait">
+					<img src="<?php echo alf_img( 'stock-attorney.png' ); ?>" alt="Nadeem R. Kasam, Attorney at Law">
+				</figure>
 
-			<header class="attorney-identity">
-				<div class="eyebrow">Our Attorney</div>
-				<h1 class="attorney-name">Nadeem R. Kasam</h1>
-				<p class="attorney-subtitle">Attorney at Law<br>Former Immigration Judge</p>
-				<p class="attorney-tagline">Real experience. Practical solutions. A stronger tomorrow.</p>
-				<div class="actions">
-					<button class="btn btn-primary open-lobby" type="button">Join Virtual Lobby</button>
-					<?php alf_render_call_text_buttons(); ?>
-				</div>
-				<?php if ( $alf_attorney_phone ) : ?>
-					<p class="note"><?php esc_html_e( 'Message and data rates may apply.', 'access-law-firm' ); ?></p>
-				<?php endif; ?>
-			</header>
+				<header class="attorney-identity">
+					<div class="eyebrow">Our Attorney</div>
+					<h1 class="attorney-name">Nadeem R. Kasam</h1>
+					<p class="attorney-subtitle">Attorney at Law<br>Former Immigration Judge</p>
+					<p class="attorney-tagline">Real experience. Practical solutions. A stronger tomorrow.</p>
+					<div class="actions">
+						<button class="btn btn-primary open-lobby" type="button">Join Virtual Lobby</button>
+						<?php alf_render_call_text_buttons(); ?>
+					</div>
+					<?php if ( $alf_attorney_phone ) : ?>
+						<p class="note"><?php esc_html_e( 'Message and data rates may apply.', 'access-law-firm' ); ?></p>
+					<?php endif; ?>
+				</header>
+			</div>
 
 			<article class="attorney-about">
 				<h2>About Nadeem R. Kasam</h2>
