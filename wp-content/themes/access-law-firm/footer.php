@@ -13,7 +13,8 @@
 				<div class="logo">A</div>
 				<span>ACCESS<small style="color:#c6d5e8">LAW FIRM</small></span>
 			</div>
-			<p style="margin-top:15px">Former Immigration Judge. Experience, insight, and modern access.</p>
+			<p class="footer-attorney" style="margin-top:14px">Nadeem R. Kasam, Attorney at Law</p>
+			<p style="margin-top:8px">Former Immigration Judge. Experience, insight, and modern access.</p>
 		</div>
 		<div>
 			<b>Contact</b>
@@ -36,10 +37,17 @@
 		</div>
 		<div>
 			<b>Quick Links</b>
+			<?php
+			$alf_footer_anchor   = is_front_page() ? '' : home_url( '/' );
+			$alf_footer_attorney = alf_attorney_page_url();
+			?>
 			<p style="margin-top:10px">
-				<a href="#practice">Practice Areas</a><br>
-				<a href="#about">About</a><br>
-				<a href="#faq">FAQ</a>
+				<a href="<?php echo esc_url( $alf_footer_anchor . '#practice' ); ?>">Practice Areas</a><br>
+				<a href="<?php echo esc_url( $alf_footer_anchor . '#about' ); ?>">About</a><br>
+				<?php if ( $alf_footer_attorney ) : ?>
+					<a href="<?php echo esc_url( $alf_footer_attorney ); ?>"><?php esc_html_e( 'Attorney Profile', 'access-law-firm' ); ?></a><br>
+				<?php endif; ?>
+				<a href="<?php echo esc_url( $alf_footer_anchor . '#faq' ); ?>">FAQ</a>
 			</p>
 		</div>
 	</div>

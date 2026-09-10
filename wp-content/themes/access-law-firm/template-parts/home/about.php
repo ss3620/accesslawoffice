@@ -16,8 +16,9 @@
 		</div>
 		<div class="founder-copy">
 			<div class="eyebrow">About the Founder</div>
-			<h2>Federal immigration insight. Personal representation.</h2>
-			<p class="founder-intro">The founder of Access Law Firm brings more than 15 years of immigration experience, including service as an Immigration Judge, Supervisory Immigration Services Officer, Asylum Officer, Immigration Officer, and Adjudications Officer handling EB-5 matters.</p>
+			<h2>Nadeem R. Kasam</h2>
+			<p class="founder-title">Founder &amp; Managing Attorney <span class="founder-title-sep" aria-hidden="true">|</span> Former Immigration Judge</p>
+			<p class="founder-intro">Nadeem R. Kasam brings more than 15 years of immigration experience, including service as an Immigration Judge, Supervisory Immigration Services Officer, Asylum Officer, Immigration Officer, and Adjudications Officer handling EB-5 matters.</p>
 			<p>That experience provides a practical understanding of how immigration applications, interviews, and court cases are reviewed and decided. Access Law Firm brings that perspective to clients through clear advice, careful preparation, and strategic representation.</p>
 			<div class="founder-highlights">
 				<div><strong>Immigration Court</strong><span>Former Immigration Judge</span></div>

@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ALF_THEME_VERSION', '1.5.1' );
+define( 'ALF_THEME_VERSION', '1.6.0' );
 
 require_once get_template_directory() . '/inc/settings.php';
 require_once get_template_directory() . '/inc/twilio-otp.php';
@@ -106,6 +106,48 @@ add_action( 'wp_enqueue_scripts', 'alf_enqueue_assets' );
 function alf_img( $filename ) {
 	return esc_url( get_template_directory_uri() . '/assets/img/' . ltrim( $filename, '/' ) );
 }
+
+/**
+ * Helper: permalink of the page using the Attorney Profile template.
+ *
+ * Cached so the header does not query on every request.
+ *
+ * @return string Empty string when no such page is published.
+ */
+function alf_attorney_page_url() {
+	$page_id = get_transient( 'alf_attorney_page_id' );
+
+	if ( false === $page_id ) {
+		$found = get_posts(
+			array(
+				'post_type'        => 'page',
+				'post_status'      => 'publish',
+				'posts_per_page'   => 1,
+				'fields'           => 'ids',
+				'meta_key'         => '_wp_page_template',
+				'meta_value'       => 'template-attorney.php',
+				'suppress_filters' => false,
+			)
+		);
+		$page_id = ! empty( $found ) ? (int) $found[0] : 0;
+		set_transient( 'alf_attorney_page_id', $page_id, 12 * HOUR_IN_SECONDS );
+	}
+
+	return $page_id ? (string) get_permalink( (int) $page_id ) : '';
+}
+
+/**
+ * Forget the cached attorney page whenever a page is saved or deleted.
+ *
+ * @param int $post_id Post ID.
+ */
+function alf_flush_attorney_page_cache( $post_id ) {
+	if ( 'page' === get_post_type( $post_id ) ) {
+		delete_transient( 'alf_attorney_page_id' );
+	}
+}
+add_action( 'save_post', 'alf_flush_attorney_page_cache' );
+add_action( 'deleted_post', 'alf_flush_attorney_page_cache' );
 
 /**
  * Helper: Call Now / Text Now buttons.
