@@ -951,6 +951,10 @@ function alf_rest_client_lobby_enter( $request ) {
 		alf_sync_appointment_from_lobby_visit( $visit_id, 'app', (string) $client_id );
 	}
 
+	if ( function_exists( 'alf_notify_staff_lobby_waiting' ) ) {
+		alf_notify_staff_lobby_waiting( $visit_id );
+	}
+
 	return rest_ensure_response( alf_get_client_lobby_state( $client_id ) );
 }
 
@@ -1055,6 +1059,10 @@ function alf_rest_lobby_check_in( $request ) {
 
 	if ( function_exists( 'alf_sync_appointment_from_lobby_visit' ) ) {
 		alf_sync_appointment_from_lobby_visit( $post_id, 'website' );
+	}
+
+	if ( function_exists( 'alf_notify_staff_lobby_waiting' ) ) {
+		alf_notify_staff_lobby_waiting( $post_id );
 	}
 
 	return rest_ensure_response(

@@ -187,6 +187,10 @@ function alf_ajax_check_in() {
 		alf_sync_appointment_from_lobby_visit( $post_id, 'website' );
 	}
 
+	if ( function_exists( 'alf_notify_staff_lobby_waiting' ) ) {
+		alf_notify_staff_lobby_waiting( $post_id );
+	}
+
 	wp_send_json_success(
 		array(
 			'visit_id' => (int) $post_id,

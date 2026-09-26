@@ -466,6 +466,8 @@ function alf_render_lobby_queue_page() {
 
 		<p class="description"><?php esc_html_e( 'Queue refreshes automatically. Ready → client joins Reception Zoom. After intake, Transfer to Attorney → client sees Join Attorney.', 'access-law-firm' ); ?></p>
 
+		<div id="alf-queue-alert" class="notice notice-warning" hidden style="margin:12px 0"></div>
+
 		<table class="wp-list-table widefat fixed striped" id="alf-queue-table">
 			<thead>
 				<tr>
@@ -583,10 +585,74 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
       }).join('');
     }
 
+    var knownWaitingIds = null;
+    var notifyPermissionAsked = false;
+
+    function requestNotifyPermission() {
+      if (notifyPermissionAsked) return;
+      notifyPermissionAsked = true;
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    function playLobbyAlertTone() {
+      try {
+        var Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        var ctx = new Ctx();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.value = 0.08;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        setTimeout(function () {
+          osc.stop();
+          ctx.close();
+        }, 220);
+      } catch (e) { /* ignore */ }
+    }
+
+    function alertNewVisitors(items) {
+      var waiting = (items || []).filter(function (row) { return row.status === 'waiting'; });
+      var ids = waiting.map(function (row) { return String(row.id); });
+      if (knownWaitingIds === null) {
+        knownWaitingIds = ids;
+        return;
+      }
+      var newcomers = ids.filter(function (id) { return knownWaitingIds.indexOf(id) === -1; });
+      knownWaitingIds = ids;
+      if (!newcomers.length) return;
+
+      playLobbyAlertTone();
+      requestNotifyPermission();
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification('Access Law Firm', {
+            body: 'Someone is waiting in the Virtual Lobby.',
+            tag: 'alf-lobby-waiting'
+          });
+        } catch (e) { /* ignore */ }
+      }
+
+      var banner = document.getElementById('alf-queue-alert');
+      if (banner) {
+        banner.hidden = false;
+        banner.textContent = 'Someone is waiting in the Virtual Lobby.';
+      }
+    }
+
     function loadQueue() {
       post('alf_queue_list', {}).then(function (res) {
-        if (res && res.success) renderQueue(res.data.items || []);
-        else {
+        if (res && res.success) {
+          var items = res.data.items || [];
+          alertNewVisitors(items);
+          renderQueue(items);
+        } else {
           var msg = (res && res.data && res.data.message) ? res.data.message : 'Could not load queue.';
           bodyEl.innerHTML = '<tr><td colspan="7">' + escapeHtml(msg) + '</td></tr>';
         }
@@ -594,6 +660,8 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
         bodyEl.innerHTML = '<tr><td colspan="7">Network error loading queue.</td></tr>';
       });
     }
+
+    requestNotifyPermission();
 
     bodyEl.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-action][data-id]');

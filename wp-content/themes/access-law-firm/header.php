@@ -29,6 +29,7 @@
 		// Off the front page the section anchors must point back home.
 		$alf_anchor_base  = is_front_page() ? '' : home_url( '/' );
 		$alf_attorney_url = alf_attorney_page_url();
+		$alf_pricing_url  = alf_pricing_page_url();
 		?>
 		<nav class="navlinks" id="primaryNav" aria-label="Primary">
 			<a href="<?php echo esc_url( $alf_anchor_base . '#home' ); ?>">Home</a>
@@ -37,6 +38,9 @@
 				<a href="<?php echo esc_url( $alf_attorney_url ); ?>"><?php esc_html_e( 'Attorney', 'access-law-firm' ); ?></a>
 			<?php endif; ?>
 			<a href="<?php echo esc_url( $alf_anchor_base . '#practice' ); ?>">Practice Areas</a>
+			<?php if ( $alf_pricing_url ) : ?>
+				<a href="<?php echo esc_url( $alf_pricing_url ); ?>"><?php esc_html_e( 'Pricing', 'access-law-firm' ); ?></a>
+			<?php endif; ?>
 			<a href="<?php echo esc_url( $alf_anchor_base . '#faq' ); ?>">FAQ</a>
 			<button class="btn btn-primary open-lobby" type="button">Join Virtual Lobby</button>
 		</nav>

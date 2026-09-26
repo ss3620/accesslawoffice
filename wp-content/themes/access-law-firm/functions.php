@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ALF_THEME_VERSION', '1.6.5' );
+define( 'ALF_THEME_VERSION', '1.7.0' );
 
 require_once get_template_directory() . '/inc/settings.php';
 require_once get_template_directory() . '/inc/twilio-otp.php';
@@ -18,6 +18,7 @@ require_once get_template_directory() . '/inc/captcha.php';
 require_once get_template_directory() . '/inc/lobby-admin.php';
 require_once get_template_directory() . '/inc/lobby-appointments-admin.php';
 require_once get_template_directory() . '/inc/lobby-clients-admin.php';
+require_once get_template_directory() . '/inc/lobby-push.php';
 require_once get_template_directory() . '/inc/lobby-visits.php';
 // Mobile API: prefer the "Access Law Firm — Mobile API" plugin when active;
 // otherwise load from the theme so local/dev still works.
@@ -147,17 +148,45 @@ function alf_attorney_page_url() {
 }
 
 /**
- * Forget the cached attorney page whenever a page is saved or deleted.
+ * Helper: permalink of the page using the Pricing template.
+ *
+ * @return string
+ */
+function alf_pricing_page_url() {
+	$page_id = get_transient( 'alf_pricing_page_id' );
+
+	if ( false === $page_id ) {
+		$found = get_posts(
+			array(
+				'post_type'        => 'page',
+				'post_status'      => 'publish',
+				'posts_per_page'   => 1,
+				'fields'           => 'ids',
+				'meta_key'         => '_wp_page_template',
+				'meta_value'       => 'template-pricing.php',
+				'suppress_filters' => false,
+			)
+		);
+		$page_id = ! empty( $found ) ? (int) $found[0] : 0;
+		set_transient( 'alf_pricing_page_id', $page_id, 12 * HOUR_IN_SECONDS );
+	}
+
+	return $page_id ? (string) get_permalink( (int) $page_id ) : '';
+}
+
+/**
+ * Forget cached attorney/pricing page IDs when a page is saved or deleted.
  *
  * @param int $post_id Post ID.
  */
-function alf_flush_attorney_page_cache( $post_id ) {
+function alf_flush_special_page_cache( $post_id ) {
 	if ( 'page' === get_post_type( $post_id ) ) {
 		delete_transient( 'alf_attorney_page_id' );
+		delete_transient( 'alf_pricing_page_id' );
 	}
 }
-add_action( 'save_post', 'alf_flush_attorney_page_cache' );
-add_action( 'deleted_post', 'alf_flush_attorney_page_cache' );
+add_action( 'save_post', 'alf_flush_special_page_cache' );
+add_action( 'deleted_post', 'alf_flush_special_page_cache' );
 
 /**
  * Helper: Call Now / Text Now buttons.

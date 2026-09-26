@@ -40,12 +40,16 @@
 			<?php
 			$alf_footer_anchor   = is_front_page() ? '' : home_url( '/' );
 			$alf_footer_attorney = alf_attorney_page_url();
+			$alf_footer_pricing  = alf_pricing_page_url();
 			?>
 			<p style="margin-top:10px">
 				<a href="<?php echo esc_url( $alf_footer_anchor . '#practice' ); ?>">Practice Areas</a><br>
 				<a href="<?php echo esc_url( $alf_footer_anchor . '#about' ); ?>">About</a><br>
 				<?php if ( $alf_footer_attorney ) : ?>
 					<a href="<?php echo esc_url( $alf_footer_attorney ); ?>"><?php esc_html_e( 'Attorney Profile', 'access-law-firm' ); ?></a><br>
+				<?php endif; ?>
+				<?php if ( $alf_footer_pricing ) : ?>
+					<a href="<?php echo esc_url( $alf_footer_pricing ); ?>"><?php esc_html_e( 'Pricing', 'access-law-firm' ); ?></a><br>
 				<?php endif; ?>
 				<a href="<?php echo esc_url( $alf_footer_anchor . '#faq' ); ?>">FAQ</a>
 			</p>

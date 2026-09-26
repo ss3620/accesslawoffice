@@ -408,6 +408,34 @@ function alf_register_settings() {
 	);
 
 	add_settings_section(
+		'alf_lobby_push_section',
+		__( 'Lobby staff push', 'access-law-firm' ),
+		'alf_lobby_push_section_intro',
+		'access-law-firm'
+	);
+
+	add_settings_field(
+		'lobby_push_url',
+		__( 'Cloud Function URL', 'access-law-firm' ),
+		'alf_field_text',
+		'access-law-firm',
+		'alf_lobby_push_section',
+		array(
+			'key'         => 'lobby_push_url',
+			'placeholder' => 'https://us-central1-YOUR_PROJECT.cloudfunctions.net/notifyLobbyWaiting',
+		)
+	);
+
+	add_settings_field(
+		'lobby_push_secret',
+		__( 'Push shared secret', 'access-law-firm' ),
+		'alf_field_password',
+		'access-law-firm',
+		'alf_lobby_push_section',
+		array( 'key' => 'lobby_push_secret' )
+	);
+
+	add_settings_section(
 		'alf_verify_section',
 		__( 'Lobby verification', 'access-law-firm' ),
 		'alf_verify_section_intro',
@@ -511,6 +539,14 @@ function alf_contact_section_intro() {
 }
 
 /**
+ * Intro for lobby staff push settings.
+ */
+function alf_lobby_push_section_intro() {
+	echo '<p>' . esc_html__( 'When a visitor checks into the Virtual Lobby, WordPress calls this Cloud Function so signed-in staff get a generic push: “Someone is waiting in the Virtual Lobby.”', 'access-law-firm' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Deploy notifyLobbyWaiting, set the same secret with firebase functions:secrets:set ALF_LOBBY_PUSH_SECRET, then paste the function URL and secret here.', 'access-law-firm' ) . '</p>';
+}
+
+/**
  * Intro for verification toggles.
  */
 function alf_verify_section_intro() {
@@ -556,6 +592,15 @@ function alf_sanitize_settings( $input ) {
 
 	if ( isset( $input['firm_phone'] ) ) {
 		$output['firm_phone'] = sanitize_text_field( $input['firm_phone'] );
+	}
+	if ( isset( $input['lobby_push_url'] ) ) {
+		$output['lobby_push_url'] = esc_url_raw( trim( (string) $input['lobby_push_url'] ) );
+	}
+	if ( isset( $input['lobby_push_secret'] ) ) {
+		$secret = trim( (string) $input['lobby_push_secret'] );
+		if ( '' !== $secret ) {
+			$output['lobby_push_secret'] = sanitize_text_field( $secret );
+		}
 	}
 
 	if ( isset( $input['recaptcha_site_key'] ) ) {
