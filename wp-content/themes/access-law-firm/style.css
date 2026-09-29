@@ -2548,16 +2548,16 @@ body.lobby-open {
 }
 
 /* =========================================================
-   Pricing page template (placeholder)
+   Pricing / attorney fee schedule
    ========================================================= */
 
 .pricing-hero {
-  padding: 56px 0 40px;
+  padding: 56px 0 28px;
   background: linear-gradient(160deg, #f7faff, #fff);
 }
 
 .pricing-hero-inner {
-  max-width: 720px;
+  max-width: 760px;
 }
 
 .pricing-hero h1 {
@@ -2573,88 +2573,192 @@ body.lobby-open {
   margin-bottom: 24px;
 }
 
+.pricing-grid-section,
+.fee-appearance-section,
+.fee-notes-section {
+  padding: 28px 0 48px;
+}
+
 .pricing-grid-section {
   background: var(--soft);
+  padding-top: 36px;
 }
 
-.pricing-cards {
+.fee-board {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  align-items: start;
 }
 
-.pricing-card {
+.fee-stack {
+  display: grid;
+  gap: 22px;
+}
+
+.fee-card {
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 18px;
-  padding: 28px 24px;
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(18, 42, 78, 0.05);
 }
 
-.pricing-card-featured {
-  border-color: #e6d3ac;
-  box-shadow: 0 12px 36px rgba(18, 42, 78, 0.08);
+.fee-card-head {
+  background: linear-gradient(145deg, var(--navy), #0d438f);
+  color: #fff;
+  padding: 18px 20px 16px;
 }
 
-.pricing-card h3 {
-  font-family: Georgia, serif;
-  color: var(--navy);
-  font-size: 1.35rem;
-  margin: 10px 0 8px;
+.fee-card-head h2 {
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  line-height: 1.2;
 }
 
-.pricing-amount {
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--navy);
-  margin: 8px 0 12px;
+.fee-card-head p {
+  margin-top: 6px;
+  color: #f0d7a2;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.pricing-desc {
+.fee-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fee-table th,
+.fee-table td {
+  text-align: left;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.fee-table th {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--muted);
-  line-height: 1.55;
-  flex: 1;
+  background: #fbfcfe;
 }
 
-.pricing-features {
-  list-style: none;
-  margin: 18px 0 22px;
-  padding: 0;
+.fee-table th:last-child,
+.fee-table td:last-child {
+  text-align: right;
+  white-space: nowrap;
+  width: 7.5rem;
 }
 
-.pricing-features li {
-  padding: 8px 0;
-  border-top: 1px solid var(--line);
+.fee-table td:last-child {
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.fee-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.fee-appearance-section {
+  background: #fff;
+}
+
+.fee-appearance {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 36px;
+  align-items: center;
+}
+
+.fee-appearance-copy h2 {
+  color: var(--navy);
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  margin: 10px 0 14px;
+}
+
+.fee-appearance-copy p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.fee-appearance-tag {
+  margin-top: 16px;
+  color: var(--navy);
+  font-family: Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.fee-cocounsel {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #e6d3ac;
+  background: #fffaf1;
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.fee-notes {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.fee-notes-card,
+.fee-cta {
+  border-radius: 18px;
+  padding: 26px 24px;
+}
+
+.fee-notes-card {
+  background: var(--blue2);
+  border: 1px solid var(--line);
+}
+
+.fee-notes-card h2,
+.fee-cta h2 {
+  color: var(--navy);
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
+  margin-bottom: 14px;
+}
+
+.fee-notes-card ul,
+.fee-cta ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.fee-notes-card li,
+.fee-cta li {
+  margin: 0 0 10px;
   color: var(--ink);
-  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
-.pricing-note-section {
+.fee-cta {
   background: linear-gradient(150deg, var(--navy), #0d438f);
+}
+
+.fee-cta h2,
+.fee-cta li {
   color: #fff;
 }
 
-.pricing-note-inner {
-  max-width: 720px;
-  text-align: center;
-}
-
-.pricing-note-inner h2 {
-  margin-bottom: 12px;
-}
-
-.pricing-note-inner p {
-  color: #dbe6f5;
-  margin-bottom: 22px;
-}
-
-.pricing-note-inner .actions {
-  justify-content: center;
+.fee-cta .actions {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 @media (max-width: 900px) {
-  .pricing-cards {
+  .fee-board,
+  .fee-appearance,
+  .fee-notes {
     grid-template-columns: 1fr;
   }
 }
