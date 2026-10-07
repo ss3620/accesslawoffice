@@ -554,6 +554,14 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
       });
     }
 
+    function phoneCell(phone) {
+      var text = String(phone || '').trim();
+      if (!text || text === '—') return '—';
+      var dial = text.replace(/[^\d+]/g, '');
+      if (!dial) return escapeHtml(text);
+      return '<a href="tel:' + escapeHtml(dial) + '">' + escapeHtml(text) + '</a>';
+    }
+
     function renderQueue(items) {
       if (!items || !items.length) {
         bodyEl.innerHTML = '<tr><td colspan="7">No visitors in the queue right now.</td></tr>';
@@ -576,7 +584,7 @@ function alf_enqueue_lobby_admin_assets( $hook ) {
         return '<tr>' +
           '<td>' + escapeHtml(row.position) + '</td>' +
           '<td><strong>' + escapeHtml(row.name) + '</strong></td>' +
-          '<td>' + escapeHtml(row.phone) + '</td>' +
+          '<td>' + phoneCell(row.phone) + '</td>' +
           '<td>' + escapeHtml(row.matter) + '</td>' +
           '<td>' + escapeHtml(row.wait) + '</td>' +
           '<td><span class="alf-status-badge alf-status-' + escapeHtml(row.status) + '">' + escapeHtml(row.status_label) + '</span></td>' +

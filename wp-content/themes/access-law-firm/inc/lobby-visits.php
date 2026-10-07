@@ -130,8 +130,7 @@ function alf_ajax_check_in() {
 		wp_send_json_error( array( 'message' => __( 'Please complete your name and matter type.', 'access-law-firm' ) ), 400 );
 	}
 
-	// Phone is only required while SMS verification is on (phone step is skipped otherwise).
-	if ( $sms_on && '' === $phone ) {
+	if ( '' === $phone ) {
 		wp_send_json_error( array( 'message' => __( 'Please enter a valid phone number.', 'access-law-firm' ) ), 400 );
 	}
 

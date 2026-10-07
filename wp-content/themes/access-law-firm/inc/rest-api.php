@@ -908,6 +908,14 @@ function alf_rest_client_lobby_enter( $request ) {
 		return new WP_Error( 'alf_not_found', __( 'Client not found.', 'access-law-firm' ), array( 'status' => 404 ) );
 	}
 
+	$country = (string) $request->get_param( 'country' );
+	$phone   = function_exists( 'alf_normalize_phone' )
+		? alf_normalize_phone( (string) $request->get_param( 'phone' ), $country )
+		: sanitize_text_field( (string) $request->get_param( 'phone' ) );
+	if ( '' === $phone ) {
+		return new WP_Error( 'alf_invalid', __( 'Please enter a valid phone number.', 'access-law-firm' ), array( 'status' => 400 ) );
+	}
+
 	$existing_visit = (int) get_post_meta( $client_id, 'lobby_visit_id', true );
 	if ( $existing_visit ) {
 		$status = get_post_meta( $existing_visit, 'queue_status', true );
@@ -932,7 +940,7 @@ function alf_rest_client_lobby_enter( $request ) {
 	}
 
 	update_post_meta( $visit_id, 'visitor_name', $client['name'] );
-	update_post_meta( $visit_id, 'phone_e164', '' );
+	update_post_meta( $visit_id, 'phone_e164', $phone );
 	update_post_meta( $visit_id, 'matter_type', 'App client' );
 	update_post_meta( $visit_id, 'queue_status', 'waiting' );
 	update_post_meta( $visit_id, 'checked_in_at', $now );
@@ -1008,7 +1016,7 @@ function alf_rest_lobby_check_in( $request ) {
 	if ( strlen( $name ) < 2 || '' === $matter ) {
 		return new WP_Error( 'alf_invalid', __( 'Please complete your name and matter type.', 'access-law-firm' ), array( 'status' => 400 ) );
 	}
-	if ( $sms_on && '' === $phone ) {
+	if ( '' === $phone ) {
 		return new WP_Error( 'alf_invalid', __( 'Please enter a valid phone number.', 'access-law-firm' ), array( 'status' => 400 ) );
 	}
 

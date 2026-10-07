@@ -184,7 +184,7 @@
 				</svg>
 			</div>
 			<h3 class="lobby-step-title">What is your mobile phone number?</h3>
-			<p class="lobby-step-desc" id="lobbyPhoneDesc">We use this number to reach you about your visit.</p>
+			<p class="lobby-step-desc" id="lobbyPhoneDesc">If we miss you in the lobby, we will call this number.</p>
 			<div class="field">
 				<label for="lobbyPhone">Mobile phone number</label>
 				<div class="phone-row">
@@ -195,7 +195,7 @@
 					<input type="tel" id="lobbyPhone" name="phone" placeholder="(713) 555-0123" autocomplete="tel">
 				</div>
 				<div class="lobby-error" data-error-for="phone">Please enter a valid 10-digit mobile number.</div>
-				<div class="phone-info" id="lobbyPhoneInfo">Your number is kept private and used only for this visit.</div>
+				<div class="phone-info" id="lobbyPhoneInfo">Your number is kept private and used only so our team can call you about this visit.</div>
 			</div>
 			<div class="lobby-actions">
 				<button class="btn btn-primary" type="button" data-lobby-next id="lobbyPhoneNext">Continue →</button>

@@ -212,7 +212,10 @@ function alf_appointments_admin_js() {
     function contactCell(row) {
       var parts = [];
       if (row.email) parts.push(escapeHtml(row.email));
-      if (row.phone) parts.push(escapeHtml(row.phone));
+      if (row.phone && row.phone !== '—') {
+        var dial = String(row.phone).replace(/[^\d+]/g, '');
+        parts.push(dial ? '<a href="tel:' + escapeHtml(dial) + '">' + escapeHtml(row.phone) + '</a>' : escapeHtml(row.phone));
+      }
       return parts.length ? parts.join('<br>') : '—';
     }
 

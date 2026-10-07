@@ -751,20 +751,10 @@
     function goNext(triggerBtn) {
       if (busy) return;
 
-      // Step 1: name → phone (SMS on) / CAPTCHA / matter (phone step skipped while SMS is off).
+      // Step 1: name, then always collect a phone number.
       if (currentStep === 1) {
         if (!validateCurrent()) return;
-        if (smsEnabled) {
-          showStep(2);
-          return;
-        }
-        if (captchaEnabled) {
-          verifyPhase = 'captcha';
-          captchaDone = false;
-          showStep(3);
-          return;
-        }
-        showStep(4);
+        showStep(2);
         return;
       }
 
@@ -814,9 +804,8 @@
         showStep(3);
         return;
       }
-      // Phone step is skipped while SMS is off — jump over it going back too.
-      if (!smsEnabled && (currentStep === 3 || currentStep === 4)) {
-        showStep(1);
+      if (currentStep === 4 && !smsEnabled && !captchaEnabled) {
+        showStep(2);
         return;
       }
       if (currentStep > 0) {
